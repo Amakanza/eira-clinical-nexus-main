@@ -9,43 +9,46 @@ import {
   Clock,
   Users
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
-const quickActions = [
-  {
-    id: 'new-note',
-    title: 'New Clinical Note',
-    description: 'Create a new patient note',
-    icon: FileText,
-    color: 'bg-blue-600 hover:bg-blue-700',
-    action: () => console.log('New note')
-  },
-  {
-    id: 'new-patient',
-    title: 'Register Patient',
-    description: 'Add new patient to system',
-    icon: Users,
-    color: 'bg-green-600 hover:bg-green-700',
-    action: () => console.log('New patient')
-  },
-  {
-    id: 'schedule',
-    title: 'Schedule Appointment',
-    description: 'Book new appointment',
-    icon: Calendar,
-    color: 'bg-purple-600 hover:bg-purple-700',
-    action: () => console.log('Schedule')
-  },
-  {
-    id: 'search',
-    title: 'Advanced Search',
-    description: 'Find patients or records',
-    icon: Search,
-    color: 'bg-gray-600 hover:bg-gray-700',
-    action: () => console.log('Search')
-  }
-];
+const QuickActions = () => {
+  const navigate = useNavigate();
 
-export const QuickActions = () => {
+  const quickActions = [
+    {
+      id: 'new-note',
+      title: 'New Clinical Note',
+      description: 'Create a new patient note',
+      icon: FileText,
+      color: 'bg-blue-600 hover:bg-blue-700',
+      action: () => navigate('/notes')
+    },
+    {
+      id: 'new-patient',
+      title: 'Register Patient',
+      description: 'Add new patient to system',
+      icon: Users,
+      color: 'bg-green-600 hover:bg-green-700',
+      action: () => navigate('/patients')
+    },
+    {
+      id: 'schedule',
+      title: 'Schedule Appointment',
+      description: 'Book new appointment',
+      icon: Calendar,
+      color: 'bg-purple-600 hover:bg-purple-700',
+      action: () => navigate('/appointments')
+    },
+    {
+      id: 'search',
+      title: 'Advanced Search',
+      description: 'Find patients or records',
+      icon: Search,
+      color: 'bg-gray-600 hover:bg-gray-700',
+      action: () => navigate('/search')
+    }
+  ];
+
   return (
     <Card>
       <CardHeader>
@@ -85,3 +88,5 @@ export const QuickActions = () => {
     </Card>
   );
 };
+
+export { QuickActions };
