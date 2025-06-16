@@ -1,0 +1,21 @@
+
+{
+  "name": "Eira Clinical Nexus",
+  "short_name": "Eira",
+  "description": "Advanced Clinical Notes and Reporting Platform",
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#2563eb",
+  "background_color": "#ffffff",
+  "orientation": "any",
+  "scope": "/",
+  "lang": "en",
+  "categories": ["medical", "productivity", "health"],
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "any",
+      "type": "image/x-icon"
+    }
+  ]
+}
