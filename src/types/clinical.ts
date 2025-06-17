@@ -1,3 +1,4 @@
+
 export interface MainMember {
   medicalAidName: string;
   medicalAidNumber: string;
@@ -69,7 +70,7 @@ export interface ClinicalNote {
   patientId: string;
   authorId: string;
   authorName: string;
-  type: 'progress' | 'admission' | 'discharge' | 'consultation' | 'procedure';
+  type: 'progress' | 'admission' | 'discharge' | 'consultation' | 'procedure' | 'soap-note';
   title: string;
   content: string;
   templateId?: string;
@@ -115,3 +116,6 @@ export interface ICD10Code {
   description: string;
   category?: string;
 }
+
+// Re-export template types
+export * from './templates';
