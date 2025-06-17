@@ -16,7 +16,7 @@ const Patients = () => {
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  const { patients, loading, addPatient, updatePatient, archivePatient, isOffline } = usePatients();
+  const { patients, loading, addPatient, updatePatient, archivePatient, unarchivePatient, isOffline } = usePatients();
 
   const handleAddPatient = () => {
     setSelectedPatient(null);
@@ -39,6 +39,16 @@ const Patients = () => {
         await archivePatient(patient.id);
       } catch (error) {
         console.error('Failed to archive patient:', error);
+      }
+    }
+  };
+
+  const handleUnarchivePatient = async (patient: Patient) => {
+    if (window.confirm(`Are you sure you want to unarchive ${patient.firstName} ${patient.lastName}?`)) {
+      try {
+        await unarchivePatient(patient.id);
+      } catch (error) {
+        console.error('Failed to unarchive patient:', error);
       }
     }
   };
@@ -95,6 +105,7 @@ const Patients = () => {
             onEditPatient={handleEditPatient}
             onViewPatient={handleViewPatient}
             onArchivePatient={handleArchivePatient}
+            onUnarchivePatient={handleUnarchivePatient}
             isLoading={loading}
           />
         );

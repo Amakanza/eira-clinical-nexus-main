@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { Patient } from '@/types/clinical';
+import { Patient, Diagnosis } from '@/types/clinical';
 import { useOfflineStorage } from './useOfflineStorage';
 import { toast } from '@/components/ui/use-toast';
 
@@ -14,7 +14,8 @@ const STORAGE_CONFIG = {
       indexes: [
         { name: 'mrn', keyPath: 'mrn', unique: true },
         { name: 'lastName', keyPath: 'lastName' },
-        { name: 'status', keyPath: 'status' }
+        { name: 'status', keyPath: 'status' },
+        { name: 'idNumber', keyPath: 'idNumber' }
       ]
     }
   ]
@@ -55,22 +56,56 @@ export const usePatients = () => {
       lastName: patientData.lastName,
       dateOfBirth: patientData.dateOfBirth,
       gender: patientData.gender,
+      idNumber: patientData.idNumber,
       phone: patientData.phone || undefined,
+      cellNumber: patientData.cellNumber || undefined,
       email: patientData.email || undefined,
+      occupation: patientData.occupation || undefined,
+      dependentCode: patientData.dependentCode || undefined,
+      
+      // Main member information
+      mainMember: patientData.medicalAidName ? {
+        medicalAidName: patientData.medicalAidName,
+        medicalAidNumber: patientData.medicalAidNumber || '',
+        medicalAidId: patientData.medicalAidId || '',
+        idNumber: patientData.mainMemberIdNumber || '',
+        bank: patientData.bank || '',
+        bankAccountNumber: patientData.bankAccountNumber || '',
+        occupation: patientData.mainMemberOccupation || '',
+        employerName: patientData.employerName || '',
+        referringDoctor: patientData.referringDoctor || undefined,
+        familyDoctor: patientData.familyDoctor || undefined,
+      } : undefined,
+      
+      // Address (simplified)
       address: patientData.street ? {
         street: patientData.street,
         city: patientData.city || '',
-        state: patientData.state || '',
-        zipCode: patientData.zipCode || '',
       } : undefined,
-      emergencyContact: patientData.emergencyContactName ? {
-        name: patientData.emergencyContactName,
-        relationship: patientData.emergencyContactRelationship || '',
-        phone: patientData.emergencyContactPhone || '',
+      
+      // Next of kin contacts
+      nextOfKin1: patientData.nextOfKin1Name ? {
+        name: patientData.nextOfKin1Name,
+        relationship: patientData.nextOfKin1Relationship || '',
+        phone: patientData.nextOfKin1Phone || '',
+        idNumber: patientData.nextOfKin1IdNumber || undefined,
+        email: patientData.nextOfKin1Email || undefined,
       } : undefined,
+      
+      nextOfKin2: patientData.nextOfKin2Name ? {
+        name: patientData.nextOfKin2Name,
+        relationship: patientData.nextOfKin2Relationship || '',
+        phone: patientData.nextOfKin2Phone || '',
+        idNumber: patientData.nextOfKin2IdNumber || undefined,
+        email: patientData.nextOfKin2Email || undefined,
+      } : undefined,
+      
+      // Medical information
       allergies: patientData.allergies ? patientData.allergies.split(',').map((s: string) => s.trim()).filter(Boolean) : [],
       medications: patientData.medications ? patientData.medications.split(',').map((s: string) => s.trim()).filter(Boolean) : [],
       medicalHistory: patientData.medicalHistory ? patientData.medicalHistory.split(',').map((s: string) => s.trim()).filter(Boolean) : [],
+      diagnoses: patientData.diagnoses || [],
+      
       status: 'active',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
@@ -115,22 +150,56 @@ export const usePatients = () => {
       lastName: patientData.lastName,
       dateOfBirth: patientData.dateOfBirth,
       gender: patientData.gender,
+      idNumber: patientData.idNumber,
       phone: patientData.phone || undefined,
+      cellNumber: patientData.cellNumber || undefined,
       email: patientData.email || undefined,
+      occupation: patientData.occupation || undefined,
+      dependentCode: patientData.dependentCode || undefined,
+      
+      // Main member information
+      mainMember: patientData.medicalAidName ? {
+        medicalAidName: patientData.medicalAidName,
+        medicalAidNumber: patientData.medicalAidNumber || '',
+        medicalAidId: patientData.medicalAidId || '',
+        idNumber: patientData.mainMemberIdNumber || '',
+        bank: patientData.bank || '',
+        bankAccountNumber: patientData.bankAccountNumber || '',
+        occupation: patientData.mainMemberOccupation || '',
+        employerName: patientData.employerName || '',
+        referringDoctor: patientData.referringDoctor || undefined,
+        familyDoctor: patientData.familyDoctor || undefined,
+      } : undefined,
+      
+      // Address (simplified)
       address: patientData.street ? {
         street: patientData.street,
         city: patientData.city || '',
-        state: patientData.state || '',
-        zipCode: patientData.zipCode || '',
       } : undefined,
-      emergencyContact: patientData.emergencyContactName ? {
-        name: patientData.emergencyContactName,
-        relationship: patientData.emergencyContactRelationship || '',
-        phone: patientData.emergencyContactPhone || '',
+      
+      // Next of kin contacts
+      nextOfKin1: patientData.nextOfKin1Name ? {
+        name: patientData.nextOfKin1Name,
+        relationship: patientData.nextOfKin1Relationship || '',
+        phone: patientData.nextOfKin1Phone || '',
+        idNumber: patientData.nextOfKin1IdNumber || undefined,
+        email: patientData.nextOfKin1Email || undefined,
       } : undefined,
+      
+      nextOfKin2: patientData.nextOfKin2Name ? {
+        name: patientData.nextOfKin2Name,
+        relationship: patientData.nextOfKin2Relationship || '',
+        phone: patientData.nextOfKin2Phone || '',
+        idNumber: patientData.nextOfKin2IdNumber || undefined,
+        email: patientData.nextOfKin2Email || undefined,
+      } : undefined,
+      
+      // Medical information
       allergies: patientData.allergies ? patientData.allergies.split(',').map((s: string) => s.trim()).filter(Boolean) : [],
       medications: patientData.medications ? patientData.medications.split(',').map((s: string) => s.trim()).filter(Boolean) : [],
       medicalHistory: patientData.medicalHistory ? patientData.medicalHistory.split(',').map((s: string) => s.trim()).filter(Boolean) : [],
+      diagnoses: patientData.diagnoses || [],
+      
       updatedAt: new Date().toISOString(),
     };
 
@@ -198,12 +267,49 @@ export const usePatients = () => {
     }
   };
 
+  const unarchivePatient = async (patientId: string): Promise<void> => {
+    const patient = patients.find(p => p.id === patientId);
+    if (!patient) throw new Error('Patient not found');
+
+    const unarchivedPatient = {
+      ...patient,
+      status: 'active' as const,
+      updatedAt: new Date().toISOString(),
+    };
+
+    try {
+      await storage.saveToStore('patients', unarchivedPatient);
+      setPatients(prev => prev.map(p => p.id === patientId ? unarchivedPatient : p));
+      
+      if (!storage.isOnline) {
+        storage.addToSyncQueue({ 
+          type: 'UNARCHIVE_PATIENT', 
+          data: { id: patientId } 
+        });
+      }
+
+      toast({
+        title: 'Success',
+        description: 'Patient unarchived successfully',
+      });
+    } catch (error) {
+      console.error('Error unarchiving patient:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to unarchive patient',
+        variant: 'destructive',
+      });
+      throw error;
+    }
+  };
+
   return {
     patients,
     loading,
     addPatient,
     updatePatient,
     archivePatient,
+    unarchivePatient,
     isOffline: !storage.isOnline,
   };
 };

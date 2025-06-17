@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Search, Edit, Archive, User, Eye } from 'lucide-react';
+import { Search, Edit, Archive, User, Eye, RotateCcw } from 'lucide-react';
 import { Patient } from '@/types/clinical';
 
 interface PatientListProps {
@@ -13,6 +13,7 @@ interface PatientListProps {
   onEditPatient: (patient: Patient) => void;
   onViewPatient: (patient: Patient) => void;
   onArchivePatient: (patient: Patient) => void;
+  onUnarchivePatient?: (patient: Patient) => void;
   isLoading?: boolean;
 }
 
@@ -20,7 +21,8 @@ export const PatientList = ({
   patients, 
   onEditPatient, 
   onViewPatient, 
-  onArchivePatient, 
+  onArchivePatient,
+  onUnarchivePatient,
   isLoading 
 }: PatientListProps) => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -31,8 +33,12 @@ export const PatientList = ({
       patient.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       patient.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       patient.mrn.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      patient.idNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       patient.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      patient.phone?.includes(searchTerm);
+      patient.phone?.includes(searchTerm) ||
+      patient.cellNumber?.includes(searchTerm) ||
+      patient.mainMember?.medicalAidNumber?.includes(searchTerm) ||
+      patient.dependentCode?.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesStatus = statusFilter === 'all' || patient.status === statusFilter;
 
@@ -77,7 +83,7 @@ export const PatientList = ({
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
-              placeholder="Search by name, MRN, email, or phone..."
+              placeholder="Search by name, MRN, ID number, medical aid number, dependent code, email, or phone..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
@@ -107,10 +113,11 @@ export const PatientList = ({
                 <TableRow>
                   <TableHead>MRN</TableHead>
                   <TableHead>Name</TableHead>
+                  <TableHead>ID Number</TableHead>
                   <TableHead>Date of Birth</TableHead>
                   <TableHead>Contact</TableHead>
+                  <TableHead>Medical Aid</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead>Last Visit</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -124,22 +131,34 @@ export const PatientList = ({
                           {patient.firstName} {patient.lastName}
                         </div>
                         <div className="text-sm text-gray-600">{patient.gender}</div>
+                        {patient.dependentCode && (
+                          <div className="text-xs text-blue-600">Dep: {patient.dependentCode}</div>
+                        )}
                       </div>
                     </TableCell>
+                    <TableCell className="font-mono text-sm">{patient.idNumber}</TableCell>
                     <TableCell>{formatDate(patient.dateOfBirth)}</TableCell>
                     <TableCell>
                       <div className="text-sm">
+                        {patient.cellNumber && <div>{patient.cellNumber}</div>}
                         {patient.phone && <div>{patient.phone}</div>}
                         {patient.email && <div className="text-gray-600">{patient.email}</div>}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="text-sm">
+                        {patient.mainMember?.medicalAidName && (
+                          <div className="font-medium">{patient.mainMember.medicalAidName}</div>
+                        )}
+                        {patient.mainMember?.medicalAidNumber && (
+                          <div className="text-gray-600">{patient.mainMember.medicalAidNumber}</div>
+                        )}
                       </div>
                     </TableCell>
                     <TableCell>
                       <Badge className={getStatusColor(patient.status)}>
                         {patient.status}
                       </Badge>
-                    </TableCell>
-                    <TableCell>
-                      {patient.lastVisit ? formatDate(patient.lastVisit) : 'Never'}
                     </TableCell>
                     <TableCell>
                       <div className="flex space-x-2">
@@ -164,6 +183,15 @@ export const PatientList = ({
                             onClick={() => onArchivePatient(patient)}
                           >
                             <Archive className="h-4 w-4" />
+                          </Button>
+                        )}
+                        {patient.status === 'inactive' && onUnarchivePatient && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => onUnarchivePatient(patient)}
+                          >
+                            <RotateCcw className="h-4 w-4" />
                           </Button>
                         )}
                       </div>
