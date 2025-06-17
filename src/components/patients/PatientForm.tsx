@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -43,19 +42,15 @@ const patientSchema = z.object({
   street: z.string().optional(),
   city: z.string().optional(),
 
-  // Next of Kin 1
+  // Next of Kin 1 (removed idNumber and email)
   nextOfKin1Name: z.string().optional(),
   nextOfKin1Relationship: z.string().optional(),
   nextOfKin1Phone: z.string().optional(),
-  nextOfKin1IdNumber: z.string().optional(),
-  nextOfKin1Email: z.string().optional(),
 
-  // Next of Kin 2
+  // Next of Kin 2 (removed idNumber and email)
   nextOfKin2Name: z.string().optional(),
   nextOfKin2Relationship: z.string().optional(),
   nextOfKin2Phone: z.string().optional(),
-  nextOfKin2IdNumber: z.string().optional(),
-  nextOfKin2Email: z.string().optional(),
 
   // Medical Information
   allergies: z.string().optional(),
@@ -72,13 +67,18 @@ interface PatientFormProps {
   isLoading?: boolean;
 }
 
+// Generate a random 5-digit medical record number
+const generateMRN = (): string => {
+  return Math.floor(10000 + Math.random() * 90000).toString();
+};
+
 export const PatientForm = ({ patient, onSubmit, onCancel, isLoading }: PatientFormProps) => {
   const [diagnoses, setDiagnoses] = React.useState<Diagnosis[]>(patient?.diagnoses || []);
 
   const form = useForm<PatientFormData>({
     resolver: zodResolver(patientSchema),
     defaultValues: {
-      mrn: patient?.mrn || '',
+      mrn: patient?.mrn || generateMRN(),
       firstName: patient?.firstName || '',
       lastName: patient?.lastName || '',
       dateOfBirth: patient?.dateOfBirth || '',
@@ -106,18 +106,14 @@ export const PatientForm = ({ patient, onSubmit, onCancel, isLoading }: PatientF
       street: patient?.address?.street || '',
       city: patient?.address?.city || '',
       
-      // Next of Kin
+      // Next of Kin (removed idNumber and email fields)
       nextOfKin1Name: patient?.nextOfKin1?.name || '',
       nextOfKin1Relationship: patient?.nextOfKin1?.relationship || '',
       nextOfKin1Phone: patient?.nextOfKin1?.phone || '',
-      nextOfKin1IdNumber: patient?.nextOfKin1?.idNumber || '',
-      nextOfKin1Email: patient?.nextOfKin1?.email || '',
       
       nextOfKin2Name: patient?.nextOfKin2?.name || '',
       nextOfKin2Relationship: patient?.nextOfKin2?.relationship || '',
       nextOfKin2Phone: patient?.nextOfKin2?.phone || '',
-      nextOfKin2IdNumber: patient?.nextOfKin2?.idNumber || '',
-      nextOfKin2Email: patient?.nextOfKin2?.email || '',
       
       // Medical
       allergies: patient?.allergies?.join(', ') || '',
@@ -172,7 +168,7 @@ export const PatientForm = ({ patient, onSubmit, onCancel, isLoading }: PatientF
                       <FormItem>
                         <FormLabel>Medical Record Number</FormLabel>
                         <FormControl>
-                          <Input {...field} placeholder="MRN-12345" />
+                          <Input {...field} placeholder="12345" disabled />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -484,7 +480,7 @@ export const PatientForm = ({ patient, onSubmit, onCancel, isLoading }: PatientF
               <TabsContent value="nextofkin" className="space-y-6">
                 <div className="space-y-4">
                   <h3 className="text-lg font-medium">Next of Kin 1</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <FormField
                       control={form.control}
                       name="nextOfKin1Name"
@@ -511,8 +507,6 @@ export const PatientForm = ({ patient, onSubmit, onCancel, isLoading }: PatientF
                         </FormItem>
                       )}
                     />
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <FormField
                       control={form.control}
                       name="nextOfKin1Phone"
@@ -526,38 +520,12 @@ export const PatientForm = ({ patient, onSubmit, onCancel, isLoading }: PatientF
                         </FormItem>
                       )}
                     />
-                    <FormField
-                      control={form.control}
-                      name="nextOfKin1IdNumber"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>ID Number</FormLabel>
-                          <FormControl>
-                            <Input {...field} placeholder="8001010000000" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="nextOfKin1Email"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Email</FormLabel>
-                          <FormControl>
-                            <Input {...field} placeholder="jane@email.com" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
                   </div>
                 </div>
 
                 <div className="space-y-4">
                   <h3 className="text-lg font-medium">Next of Kin 2</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <FormField
                       control={form.control}
                       name="nextOfKin2Name"
@@ -584,8 +552,6 @@ export const PatientForm = ({ patient, onSubmit, onCancel, isLoading }: PatientF
                         </FormItem>
                       )}
                     />
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <FormField
                       control={form.control}
                       name="nextOfKin2Phone"
@@ -594,32 +560,6 @@ export const PatientForm = ({ patient, onSubmit, onCancel, isLoading }: PatientF
                           <FormLabel>Phone</FormLabel>
                           <FormControl>
                             <Input {...field} placeholder="082 987 6543" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="nextOfKin2IdNumber"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>ID Number</FormLabel>
-                          <FormControl>
-                            <Input {...field} placeholder="7501010000000" />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="nextOfKin2Email"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Email</FormLabel>
-                          <FormControl>
-                            <Input {...field} placeholder="john@email.com" />
                           </FormControl>
                           <FormMessage />
                         </FormItem>

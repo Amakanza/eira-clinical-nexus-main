@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Patient, Diagnosis } from '@/types/clinical';
 import { useOfflineStorage } from './useOfflineStorage';
@@ -83,21 +82,17 @@ export const usePatients = () => {
         city: patientData.city || '',
       } : undefined,
       
-      // Next of kin contacts
+      // Next of kin contacts (removed idNumber and email)
       nextOfKin1: patientData.nextOfKin1Name ? {
         name: patientData.nextOfKin1Name,
         relationship: patientData.nextOfKin1Relationship || '',
         phone: patientData.nextOfKin1Phone || '',
-        idNumber: patientData.nextOfKin1IdNumber || undefined,
-        email: patientData.nextOfKin1Email || undefined,
       } : undefined,
       
       nextOfKin2: patientData.nextOfKin2Name ? {
         name: patientData.nextOfKin2Name,
         relationship: patientData.nextOfKin2Relationship || '',
         phone: patientData.nextOfKin2Phone || '',
-        idNumber: patientData.nextOfKin2IdNumber || undefined,
-        email: patientData.nextOfKin2Email || undefined,
       } : undefined,
       
       // Medical information
@@ -177,21 +172,17 @@ export const usePatients = () => {
         city: patientData.city || '',
       } : undefined,
       
-      // Next of kin contacts
+      // Next of kin contacts (removed idNumber and email)
       nextOfKin1: patientData.nextOfKin1Name ? {
         name: patientData.nextOfKin1Name,
         relationship: patientData.nextOfKin1Relationship || '',
         phone: patientData.nextOfKin1Phone || '',
-        idNumber: patientData.nextOfKin1IdNumber || undefined,
-        email: patientData.nextOfKin1Email || undefined,
       } : undefined,
       
       nextOfKin2: patientData.nextOfKin2Name ? {
         name: patientData.nextOfKin2Name,
         relationship: patientData.nextOfKin2Relationship || '',
         phone: patientData.nextOfKin2Phone || '',
-        idNumber: patientData.nextOfKin2IdNumber || undefined,
-        email: patientData.nextOfKin2Email || undefined,
       } : undefined,
       
       // Medical information

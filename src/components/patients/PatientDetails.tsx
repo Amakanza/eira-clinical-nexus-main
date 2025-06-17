@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { ArrowLeft, Edit, Archive, User, Phone, Mail, MapPin, AlertTriangle, Pill, FileText } from 'lucide-react';
+import { ArrowLeft, Edit, Archive, User, Phone, Mail, MapPin, AlertTriangle, Pill, FileText, CreditCard } from 'lucide-react';
 import { Patient } from '@/types/clinical';
 
 interface PatientDetailsProps {
@@ -86,6 +86,22 @@ export const PatientDetails = ({ patient, onEdit, onArchive, onBack }: PatientDe
               <p>{formatDate(patient.dateOfBirth)}</p>
             </div>
             <div>
+              <label className="text-sm font-medium text-gray-600">ID Number</label>
+              <p>{patient.idNumber}</p>
+            </div>
+            {patient.occupation && (
+              <div>
+                <label className="text-sm font-medium text-gray-600">Occupation</label>
+                <p>{patient.occupation}</p>
+              </div>
+            )}
+            {patient.dependentCode && (
+              <div>
+                <label className="text-sm font-medium text-gray-600">Dependent Code</label>
+                <p>{patient.dependentCode}</p>
+              </div>
+            )}
+            <div>
               <label className="text-sm font-medium text-gray-600">Last Visit</label>
               <p>{patient.lastVisit ? formatDate(patient.lastVisit) : 'Never'}</p>
             </div>
@@ -107,6 +123,12 @@ export const PatientDetails = ({ patient, onEdit, onArchive, onBack }: PatientDe
                 <span>{patient.phone}</span>
               </div>
             )}
+            {patient.cellNumber && (
+              <div className="flex items-center space-x-2">
+                <Phone className="h-4 w-4 text-gray-600" />
+                <span>{patient.cellNumber} (Cell)</span>
+              </div>
+            )}
             {patient.email && (
               <div className="flex items-center space-x-2">
                 <Mail className="h-4 w-4 text-gray-600" />
@@ -118,32 +140,80 @@ export const PatientDetails = ({ patient, onEdit, onArchive, onBack }: PatientDe
                 <MapPin className="h-4 w-4 text-gray-600 mt-1" />
                 <div>
                   <p>{patient.address.street}</p>
-                  <p>{patient.address.city}, {patient.address.state} {patient.address.zipCode}</p>
+                  <p>{patient.address.city}</p>
                 </div>
               </div>
             )}
           </CardContent>
         </Card>
 
-        {/* Emergency Contact */}
-        {patient.emergencyContact && (
+        {/* Main Member Information */}
+        {patient.mainMember && (
           <Card>
             <CardHeader>
-              <CardTitle>Emergency Contact</CardTitle>
+              <CardTitle className="flex items-center space-x-2">
+                <CreditCard className="h-5 w-5" />
+                <span>Medical Aid Information</span>
+              </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2">
+            <CardContent className="space-y-4">
               <div>
-                <label className="text-sm font-medium text-gray-600">Name</label>
-                <p>{patient.emergencyContact.name}</p>
+                <label className="text-sm font-medium text-gray-600">Medical Aid Name</label>
+                <p className="font-semibold">{patient.mainMember.medicalAidName}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-600">Relationship</label>
-                <p>{patient.emergencyContact.relationship}</p>
+                <label className="text-sm font-medium text-gray-600">Medical Aid Number</label>
+                <p className="text-lg font-semibold text-blue-600">{patient.mainMember.medicalAidNumber}</p>
               </div>
-              <div>
-                <label className="text-sm font-medium text-gray-600">Phone</label>
-                <p>{patient.emergencyContact.phone}</p>
-              </div>
+              {patient.mainMember.medicalAidId && (
+                <div>
+                  <label className="text-sm font-medium text-gray-600">Medical Aid ID</label>
+                  <p>{patient.mainMember.medicalAidId}</p>
+                </div>
+              )}
+              {patient.mainMember.referringDoctor && (
+                <div>
+                  <label className="text-sm font-medium text-gray-600">Referring Doctor</label>
+                  <p>{patient.mainMember.referringDoctor}</p>
+                </div>
+              )}
+              {patient.mainMember.familyDoctor && (
+                <div>
+                  <label className="text-sm font-medium text-gray-600">Family Doctor</label>
+                  <p>{patient.mainMember.familyDoctor}</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Next of Kin */}
+        {(patient.nextOfKin1 || patient.nextOfKin2) && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Next of Kin</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {patient.nextOfKin1 && (
+                <div>
+                  <h4 className="font-medium">Next of Kin 1</h4>
+                  <div className="mt-2 space-y-1">
+                    <p><span className="text-sm text-gray-600">Name:</span> {patient.nextOfKin1.name}</p>
+                    <p><span className="text-sm text-gray-600">Relationship:</span> {patient.nextOfKin1.relationship}</p>
+                    <p><span className="text-sm text-gray-600">Phone:</span> {patient.nextOfKin1.phone}</p>
+                  </div>
+                </div>
+              )}
+              {patient.nextOfKin2 && (
+                <div>
+                  <h4 className="font-medium">Next of Kin 2</h4>
+                  <div className="mt-2 space-y-1">
+                    <p><span className="text-sm text-gray-600">Name:</span> {patient.nextOfKin2.name}</p>
+                    <p><span className="text-sm text-gray-600">Relationship:</span> {patient.nextOfKin2.relationship}</p>
+                    <p><span className="text-sm text-gray-600">Phone:</span> {patient.nextOfKin2.phone}</p>
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
         )}
@@ -197,6 +267,23 @@ export const PatientDetails = ({ patient, onEdit, onArchive, onBack }: PatientDe
                     <Badge key={index} variant="outline">
                       {history}
                     </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {patient.diagnoses && patient.diagnoses.length > 0 && (
+              <div>
+                <label className="text-sm font-medium text-gray-600">Diagnoses</label>
+                <div className="space-y-2 mt-1">
+                  {patient.diagnoses.map((diagnosis) => (
+                    <div key={diagnosis.id} className="p-2 border rounded-lg">
+                      <div className="font-medium">{diagnosis.icd10Code}</div>
+                      <div className="text-sm text-gray-600">{diagnosis.description}</div>
+                      <div className="text-xs text-gray-500">
+                        Added: {formatDate(diagnosis.dateAdded)} by {diagnosis.addedBy}
+                      </div>
+                    </div>
                   ))}
                 </div>
               </div>

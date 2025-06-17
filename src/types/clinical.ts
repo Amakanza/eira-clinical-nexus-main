@@ -15,8 +15,6 @@ export interface NextOfKin {
   name: string;
   relationship: string;
   phone: string;
-  idNumber?: string;
-  email?: string;
 }
 
 export interface Diagnosis {
