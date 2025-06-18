@@ -1,6 +1,7 @@
 
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { Link, useLocation } from 'react-router-dom';
 import { 
   Users, 
   FileText, 
@@ -33,8 +34,11 @@ const adminNavigation = [
   { name: 'System Settings', href: '/admin/settings', icon: Settings },
 ];
 
-export const Sidebar = ({ isOpen, currentPath = '/' }: SidebarProps) => {
-  const isActive = (path: string) => currentPath === path;
+export const Sidebar = ({ isOpen, currentPath }: SidebarProps) => {
+  const location = useLocation();
+  const activePath = currentPath || location.pathname;
+  
+  const isActive = (path: string) => activePath === path;
 
   return (
     <aside
@@ -48,18 +52,19 @@ export const Sidebar = ({ isOpen, currentPath = '/' }: SidebarProps) => {
         {navigation.map((item) => {
           const Icon = item.icon;
           return (
-            <Button
-              key={item.name}
-              variant={isActive(item.href) ? 'secondary' : 'ghost'}
-              className={cn(
-                'w-full justify-start h-10',
-                isActive(item.href) && 'bg-blue-50 text-blue-700 border-blue-200',
-                !isOpen && 'justify-center px-2'
-              )}
-            >
-              <Icon className={cn('h-5 w-5', isOpen && 'mr-3')} />
-              {isOpen && <span className="text-sm font-medium">{item.name}</span>}
-            </Button>
+            <Link key={item.name} to={item.href}>
+              <Button
+                variant={isActive(item.href) ? 'secondary' : 'ghost'}
+                className={cn(
+                  'w-full justify-start h-10',
+                  isActive(item.href) && 'bg-blue-50 text-blue-700 border-blue-200',
+                  !isOpen && 'justify-center px-2'
+                )}
+              >
+                <Icon className={cn('h-5 w-5', isOpen && 'mr-3')} />
+                {isOpen && <span className="text-sm font-medium">{item.name}</span>}
+              </Button>
+            </Link>
           );
         })}
 
@@ -73,17 +78,18 @@ export const Sidebar = ({ isOpen, currentPath = '/' }: SidebarProps) => {
               {adminNavigation.map((item) => {
                 const Icon = item.icon;
                 return (
-                  <Button
-                    key={item.name}
-                    variant={isActive(item.href) ? 'secondary' : 'ghost'}
-                    className={cn(
-                      'w-full justify-start h-10',
-                      isActive(item.href) && 'bg-blue-50 text-blue-700 border-blue-200'
-                    )}
-                  >
-                    <Icon className="h-5 w-5 mr-3" />
-                    <span className="text-sm font-medium">{item.name}</span>
-                  </Button>
+                  <Link key={item.name} to={item.href}>
+                    <Button
+                      variant={isActive(item.href) ? 'secondary' : 'ghost'}
+                      className={cn(
+                        'w-full justify-start h-10',
+                        isActive(item.href) && 'bg-blue-50 text-blue-700 border-blue-200'
+                      )}
+                    >
+                      <Icon className="h-5 w-5 mr-3" />
+                      <span className="text-sm font-medium">{item.name}</span>
+                    </Button>
+                  </Link>
                 );
               })}
             </div>
