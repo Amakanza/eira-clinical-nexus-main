@@ -10,6 +10,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { Save, ArrowLeft } from 'lucide-react';
 import { SOAPNote, Patient } from '@/types/clinical';
+import { TemplateFormBuilder } from './TemplateFormBuilder';
+import { useSOAPNotes } from '@/hooks/useSOAPNotes';
 
 interface SOAPNoteFormProps {
   patient: Patient;
@@ -23,6 +25,9 @@ interface SOAPNoteFormProps {
 }
 
 export const SOAPNoteForm = ({ patient, template, onSave, onCancel, isLoading }: SOAPNoteFormProps) => {
+  const { getTemplatesByType } = useSOAPNotes();
+  const templateData = getTemplatesByType(template.type, template.specialty)[0];
+
   const [formData, setFormData] = useState({
     // Header information
     date: new Date().toISOString().split('T')[0],
@@ -61,6 +66,9 @@ export const SOAPNoteForm = ({ patient, template, onSave, onCancel, isLoading }:
     nextVisitFocus: [] as string[]
   });
 
+  // Template-specific form data
+  const [templateFormData, setTemplateFormData] = useState<Record<string, any>>({});
+
   const commonSymptoms = [
     'Pain', 'Stiffness', 'Weakness', 'Numbness', 'Tingling', 
     'Swelling', 'Instability', 'Fatigue', 'Balance issues'
@@ -75,12 +83,19 @@ export const SOAPNoteForm = ({ patient, template, onSave, onCancel, isLoading }:
     }));
   };
 
+  const handleTemplateFieldChange = (fieldId: string, value: any) => {
+    setTemplateFormData(prev => ({
+      ...prev,
+      [fieldId]: value
+    }));
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
     const noteData: Omit<SOAPNote, 'id' | 'createdAt' | 'updatedAt'> = {
       patientId: patient.id,
-      templateId: `${template.specialty}-${template.type}`,
+      templateId: templateData?.id || `${template.specialty}-${template.type}`,
       type: template.type,
       specialty: template.specialty,
       date: formData.date,
@@ -103,7 +118,7 @@ export const SOAPNoteForm = ({ patient, template, onSave, onCancel, isLoading }:
           temperature: formData.vitalSigns.temperature ? parseFloat(formData.vitalSigns.temperature) : undefined
         },
         observations: formData.observations,
-        measurements: {},
+        measurements: templateFormData,
         tests: {}
       },
       assessment: {
@@ -121,7 +136,7 @@ export const SOAPNoteForm = ({ patient, template, onSave, onCancel, isLoading }:
         duration: formData.duration || undefined,
         nextVisitFocus: formData.nextVisitFocus
       },
-      formData: {},
+      formData: templateFormData,
       createdBy: 'current-user', // TODO: Get from auth context
       status: 'draft'
     };
@@ -193,6 +208,26 @@ export const SOAPNoteForm = ({ patient, template, onSave, onCancel, isLoading }:
               required
             />
           </div>
+          {template.type === 'initial-evaluation' && (
+            <>
+              <div>
+                <Label htmlFor="referredBy">Referred By</Label>
+                <Input
+                  id="referredBy"
+                  value={formData.referredBy}
+                  onChange={(e) => setFormData(prev => ({ ...prev, referredBy: e.target.value }))}
+                />
+              </div>
+              <div className="md:col-span-2">
+                <Label htmlFor="reasonForReferral">Reason for Referral</Label>
+                <Input
+                  id="reasonForReferral"
+                  value={formData.reasonForReferral}
+                  onChange={(e) => setFormData(prev => ({ ...prev, reasonForReferral: e.target.value }))}
+                />
+              </div>
+            </>
+          )}
         </CardContent>
       </Card>
 
@@ -328,6 +363,15 @@ export const SOAPNoteForm = ({ patient, template, onSave, onCancel, isLoading }:
           </div>
         </CardContent>
       </Card>
+
+      {/* Specialty-Specific Template Sections */}
+      {templateData && templateData.sections && (
+        <TemplateFormBuilder
+          sections={templateData.sections}
+          formData={templateFormData}
+          onFieldChange={handleTemplateFieldChange}
+        />
+      )}
 
       {/* Assessment */}
       <Card>

@@ -1,8 +1,8 @@
-
 import { useState, useEffect } from 'react';
 import { SOAPNote, ClinicalTemplate } from '@/types/clinical';
 import { useOfflineStorage } from './useOfflineStorage';
 import { toast } from '@/hooks/use-toast';
+import { defaultTemplates } from '@/data/templates';
 
 const STORAGE_CONFIG = {
   dbName: 'EiraSOAPNotes',
@@ -68,65 +68,6 @@ export const useSOAPNotes = () => {
   };
 
   const initializeDefaultTemplates = async () => {
-    const defaultTemplates: ClinicalTemplate[] = [
-      {
-        id: 'msk-initial',
-        name: 'MSK Initial Evaluation',
-        type: 'initial-evaluation',
-        specialty: 'msk',
-        sections: [
-          {
-            id: 'systems-review',
-            title: 'Systems Review',
-            fields: [
-              {
-                id: 'cardiovascular',
-                type: 'checkbox',
-                label: 'Cardiovascular',
-                defaultValue: false
-              },
-              {
-                id: 'integumentary',
-                type: 'checkbox',
-                label: 'Integumentary',
-                defaultValue: false
-              },
-              {
-                id: 'neurological',
-                type: 'checkbox',
-                label: 'Neurological',
-                defaultValue: false
-              }
-            ]
-          },
-          {
-            id: 'rom-testing',
-            title: 'Range of Motion Testing',
-            fields: [
-              {
-                id: 'flexion',
-                type: 'number',
-                label: 'Flexion',
-                unit: '°',
-                min: 0,
-                max: 180
-              },
-              {
-                id: 'extension',
-                type: 'number',
-                label: 'Extension',
-                unit: '°',
-                min: 0,
-                max: 180
-              }
-            ]
-          }
-        ],
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      }
-    ];
-
     for (const template of defaultTemplates) {
       await storage.saveToStore('templates', template);
     }
