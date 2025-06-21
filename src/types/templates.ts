@@ -42,6 +42,8 @@ export interface SOAPNote {
   location: 'opd' | 'ward' | 'home';
   referredBy?: string;
   reasonForReferral?: string;
+  diagnosis?: string;
+  icd10Code?: string;
   
   // SOAP structure
   subjective: {
@@ -49,7 +51,7 @@ export interface SOAPNote {
     historyOfPresentIllness?: string;
     symptoms: string[];
     otherSymptoms?: string;
-    bodyChart?: any; // Will store body chart data
+    bodyChart?: string[]; // Body chart marked areas
   };
   
   objective: {
@@ -65,10 +67,10 @@ export interface SOAPNote {
     tests: Record<string, any>; // Special tests, outcome measures, etc.
   };
   
-  assessment: {
-    summary: string;
-    impairments: string[];
-    prognosis?: string;
+  action: {
+    interventionsPerformed: string[];
+    managementProvided: string;
+    homeProgram?: string;
   };
   
   plan: {
@@ -76,7 +78,6 @@ export interface SOAPNote {
       shortTerm: string[];
       longTerm: string[];
     };
-    interventions: string[];
     frequency?: string;
     duration?: string;
     nextVisitFocus?: string[];
@@ -85,8 +86,23 @@ export interface SOAPNote {
   // Additional form data from templates
   formData: Record<string, any>;
   
+  // Episode tracking
+  episodeId?: string;
+  episodeStartDate?: string;
+  episodeEndDate?: string;
+  
   createdBy: string;
   createdAt: string;
   updatedAt: string;
   status: 'draft' | 'completed' | 'signed';
+  
+  // Edit permissions
+  canEdit?: boolean;
+  comments?: Array<{
+    id: string;
+    userId: string;
+    userName: string;
+    comment: string;
+    createdAt: string;
+  }>;
 }

@@ -3,7 +3,8 @@ import React, { useState } from 'react';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { FileText, Plus, User } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { FileText, Plus, User, Calendar, Stethoscope } from 'lucide-react';
 import { TemplateSelector } from '@/components/clinical/TemplateSelector';
 import { SOAPNoteForm } from '@/components/clinical/SOAPNoteForm';
 import { useSOAPNotes } from '@/hooks/useSOAPNotes';
@@ -57,6 +58,32 @@ const ClinicalNotes = () => {
     setSelectedTemplate(null);
     setSelectedPatient(null);
   };
+
+  // Group notes by episodes (simplified version - same patient, similar conditions)
+  const groupNotesByEpisodes = (notes: any[]) => {
+    const grouped = notes.reduce((acc, note) => {
+      const key = `${note.patientId}-${note.specialty}`;
+      if (!acc[key]) {
+        acc[key] = [];
+      }
+      acc[key].push(note);
+      return acc;
+    }, {} as Record<string, any[]>);
+
+    return Object.entries(grouped).map(([key, notes]) => ({
+      id: key,
+      patientId: notes[0].patientId,
+      specialty: notes[0].specialty,
+      diagnosis: notes[0].diagnosis || 'No diagnosis recorded',
+      icd10Code: notes[0].icd10Code || '',
+      startDate: notes[notes.length - 1].date, // Oldest note
+      endDate: notes[0].date, // Newest note
+      noteCount: notes.length,
+      notes: notes.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    }));
+  };
+
+  const episodes = groupNotesByEpisodes(soapNotes);
 
   const renderContent = () => {
     switch (viewMode) {
@@ -125,41 +152,94 @@ const ClinicalNotes = () => {
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
                     <FileText className="h-5 w-5" />
-                    <span>Recent Clinical Notes</span>
+                    <span>Care Episodes</span>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   {loading ? (
                     <p className="text-gray-600">Loading clinical notes...</p>
-                  ) : soapNotes.length === 0 ? (
+                  ) : episodes.length === 0 ? (
                     <div className="text-center py-8">
                       <FileText className="h-12 w-12 text-gray-300 mx-auto mb-4" />
                       <p className="text-gray-600">No clinical notes yet</p>
                       <p className="text-sm text-gray-500">Create your first SOAP note to get started</p>
                     </div>
                   ) : (
-                    <div className="space-y-4">
-                      {soapNotes.slice(0, 10).map((note) => {
-                        const patient = patients.find(p => p.id === note.patientId);
+                    <div className="space-y-6">
+                      {episodes.map((episode) => {
+                        const patient = patients.find(p => p.id === episode.patientId);
                         return (
-                          <div key={note.id} className="border rounded-lg p-4">
+                          <div key={episode.id} className="border rounded-lg p-4 space-y-3">
                             <div className="flex justify-between items-start">
-                              <div>
-                                <div className="font-medium">
-                                  {patient ? `${patient.firstName} ${patient.lastName}` : 'Unknown Patient'}
+                              <div className="flex-1">
+                                <div className="flex items-center space-x-3 mb-2">
+                                  <div className="font-medium text-lg">
+                                    {patient ? `${patient.firstName} ${patient.lastName}` : 'Unknown Patient'}
+                                  </div>
+                                  <Badge variant="outline">{episode.specialty.toUpperCase()}</Badge>
+                                  <div className="text-sm text-gray-500">
+                                    {episode.noteCount} note{episode.noteCount !== 1 ? 's' : ''}
+                                  </div>
                                 </div>
-                                <div className="text-sm text-gray-500">
-                                  {note.type === 'initial-evaluation' ? 'Initial Evaluation' : 'Progress Note'} • 
-                                  {note.specialty.toUpperCase()} • 
-                                  {new Date(note.date).toLocaleDateString()}
+                                
+                                <div className="flex items-center space-x-4 text-sm text-gray-600 mb-2">
+                                  <div className="flex items-center space-x-1">
+                                    <Stethoscope className="h-4 w-4" />
+                                    <span>{episode.diagnosis}</span>
+                                    {episode.icd10Code && (
+                                      <Badge variant="secondary" className="text-xs">
+                                        {episode.icd10Code}
+                                      </Badge>
+                                    )}
+                                  </div>
                                 </div>
-                                <div className="text-sm text-gray-600 mt-1">
-                                  {note.subjective.chiefComplaint}
+
+                                <div className="flex items-center space-x-4 text-sm text-gray-500">
+                                  <div className="flex items-center space-x-1">
+                                    <Calendar className="h-4 w-4" />
+                                    <span>
+                                      {episode.startDate === episode.endDate 
+                                        ? new Date(episode.startDate).toLocaleDateString()
+                                        : `${new Date(episode.startDate).toLocaleDateString()} - ${new Date(episode.endDate).toLocaleDateString()}`
+                                      }
+                                    </span>
+                                  </div>
                                 </div>
                               </div>
-                              <div className="text-xs text-gray-500">
-                                {note.status}
-                              </div>
+                            </div>
+
+                            {/* Individual Notes in Episode */}
+                            <div className="pl-4 border-l-2 border-gray-200 space-y-2">
+                              {episode.notes.slice(0, 3).map((note: any) => (
+                                <div key={note.id} className="text-sm">
+                                  <div className="flex justify-between items-center">
+                                    <div className="flex items-center space-x-2">
+                                      <Badge variant={note.type === 'initial-evaluation' ? 'default' : 'secondary'} className="text-xs">
+                                        {note.type === 'initial-evaluation' ? 'Initial' : 'Progress'}
+                                      </Badge>
+                                      <span className="text-gray-600">
+                                        {new Date(note.date).toLocaleDateString()}
+                                      </span>
+                                      <span className="text-xs text-gray-500">
+                                        by {note.clinician}
+                                      </span>
+                                    </div>
+                                    <Badge variant="outline" className="text-xs">
+                                      {note.status}
+                                    </Badge>
+                                  </div>
+                                  {note.subjective?.chiefComplaint && (
+                                    <div className="text-gray-600 mt-1 truncate">
+                                      {note.subjective.chiefComplaint}
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
+                              {episode.noteCount > 3 && (
+                                <div className="text-xs text-gray-500 italic">
+                                  ... and {episode.noteCount - 3} more note{episode.noteCount - 3 !== 1 ? 's' : ''}
+                                </div>
+                              )}
                             </div>
                           </div>
                         );

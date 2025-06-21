@@ -1,4 +1,3 @@
-
 import { ClinicalTemplate } from '@/types/templates';
 
 export const defaultTemplates: ClinicalTemplate[] = [
@@ -168,6 +167,300 @@ export const defaultTemplates: ClinicalTemplate[] = [
     updatedAt: new Date().toISOString()
   },
   
+  // Updated Neurological Initial Evaluation - Functional Assessment First
+  {
+    id: 'neuro-initial',
+    name: 'Neurological Initial Evaluation',
+    type: 'initial-evaluation',
+    specialty: 'neuro',
+    sections: [
+      {
+        id: 'functional-assessment',
+        title: 'Functional Assessment (Primary)',
+        fields: [
+          {
+            id: 'mobility-level',
+            type: 'select',
+            label: 'Current Mobility Level',
+            options: [
+              { value: 'independent', label: 'Independent' },
+              { value: 'supervision', label: 'Requires Supervision' },
+              { value: 'minimal-assist', label: 'Minimal Assistance' },
+              { value: 'moderate-assist', label: 'Moderate Assistance' },
+              { value: 'maximal-assist', label: 'Maximal Assistance' },
+              { value: 'dependent', label: 'Dependent' }
+            ]
+          },
+          {
+            id: 'adl-independence',
+            type: 'select',
+            label: 'ADL Independence',
+            options: [
+              { value: 'independent', label: 'Independent' },
+              { value: 'modified-independent', label: 'Modified Independent' },
+              { value: 'supervision', label: 'Requires Supervision' },
+              { value: 'minimal-assist', label: 'Minimal Assistance' },
+              { value: 'moderate-assist', label: 'Moderate Assistance' },
+              { value: 'maximal-assist', label: 'Maximal Assistance' },
+              { value: 'dependent', label: 'Dependent' }
+            ]
+          },
+          {
+            id: 'transfers',
+            type: 'select',
+            label: 'Transfer Ability',
+            options: [
+              { value: 'independent', label: 'Independent' },
+              { value: 'supervision', label: 'Requires Supervision' },
+              { value: 'contact-guard', label: 'Contact Guard Assist' },
+              { value: 'minimal-assist', label: 'Minimal Assistance' },
+              { value: 'moderate-assist', label: 'Moderate Assistance' },
+              { value: 'maximal-assist', label: 'Maximal Assistance' },
+              { value: 'dependent', label: 'Dependent' }
+            ]
+          }
+        ]
+      },
+      {
+        id: 'balance-gait-primary',
+        title: 'Balance & Gait Assessment (Primary)',
+        fields: [
+          {
+            id: 'sitting-balance',
+            type: 'select',
+            label: 'Sitting Balance',
+            options: [
+              { value: 'normal', label: 'Normal - Independent' },
+              { value: 'good', label: 'Good - Minimal support' },
+              { value: 'fair', label: 'Fair - Requires support' },
+              { value: 'poor', label: 'Poor - Unable to maintain' }
+            ]
+          },
+          {
+            id: 'standing-balance',
+            type: 'select',
+            label: 'Standing Balance',
+            options: [
+              { value: 'normal', label: 'Normal - Independent' },
+              { value: 'good', label: 'Good - Minimal support' },
+              { value: 'fair', label: 'Fair - Requires support' },
+              { value: 'poor', label: 'Poor - Unable to maintain' }
+            ]
+          },
+          {
+            id: 'gait-pattern',
+            type: 'select',
+            label: 'Gait Pattern',
+            options: [
+              { value: 'normal', label: 'Normal' },
+              { value: 'antalgic', label: 'Antalgic' },
+              { value: 'trendelenburg', label: 'Trendelenburg' },
+              { value: 'circumduction', label: 'Circumduction' },
+              { value: 'steppage', label: 'Steppage' },
+              { value: 'ataxic', label: 'Ataxic' },
+              { value: 'hemiplegic', label: 'Hemiplegic' },
+              { value: 'parkinsonian', label: 'Parkinsonian' }
+            ]
+          },
+          {
+            id: 'assistive-device',
+            type: 'select',
+            label: 'Assistive Device',
+            options: [
+              { value: 'none', label: 'None' },
+              { value: 'cane', label: 'Single Point Cane' },
+              { value: 'quad-cane', label: 'Quad Cane' },
+              { value: 'walker', label: 'Walker' },
+              { value: 'rollator', label: 'Rollator' },
+              { value: 'crutches', label: 'Crutches' },
+              { value: 'wheelchair', label: 'Wheelchair' }
+            ]
+          }
+        ]
+      },
+      {
+        id: 'functional-outcome-measures',
+        title: 'Functional Outcome Measures',
+        fields: [
+          {
+            id: 'fim-score',
+            type: 'number',
+            label: 'Functional Independence Measure (FIM)',
+            min: 18,
+            max: 126
+          },
+          {
+            id: 'berg-balance',
+            type: 'number',
+            label: 'Berg Balance Scale',
+            min: 0,
+            max: 56
+          },
+          {
+            id: 'tug-score',
+            type: 'number',
+            label: 'Timed Up and Go (TUG)',
+            unit: 'seconds'
+          },
+          {
+            id: 'modified-rankin',
+            type: 'select',
+            label: 'Modified Rankin Scale (mRS)',
+            options: [
+              { value: '0', label: '0 - No symptoms' },
+              { value: '1', label: '1 - No significant disability' },
+              { value: '2', label: '2 - Slight disability' },
+              { value: '3', label: '3 - Moderate disability' },
+              { value: '4', label: '4 - Moderately severe disability' },
+              { value: '5', label: '5 - Severe disability' },
+              { value: '6', label: '6 - Dead' }
+            ]
+          }
+        ]
+      },
+      {
+        id: 'systems-review',
+        title: 'Systems Review',
+        fields: [
+          {
+            id: 'cardiovascular',
+            type: 'checkbox',
+            label: 'Cardiovascular',
+            defaultValue: false
+          },
+          {
+            id: 'cognitive-status',
+            type: 'checkbox',
+            label: 'Cognitive Status',
+            defaultValue: true
+          },
+          {
+            id: 'cranial-nerves',
+            type: 'checkbox',
+            label: 'Cranial Nerves',
+            defaultValue: true
+          },
+          {
+            id: 'neurological',
+            type: 'checkbox',
+            label: 'Neurological',
+            defaultValue: true
+          }
+        ]
+      },
+      {
+        id: 'coordination-testing',
+        title: 'Coordination Testing',
+        fields: [
+          {
+            id: 'finger-nose',
+            type: 'select',
+            label: 'Finger-to-Nose Test',
+            options: [
+              { value: 'normal', label: 'Normal' },
+              { value: 'mild-dysmetria', label: 'Mild Dysmetria' },
+              { value: 'moderate-dysmetria', label: 'Moderate Dysmetria' },
+              { value: 'severe-dysmetria', label: 'Severe Dysmetria' }
+            ]
+          },
+          {
+            id: 'heel-toe',
+            type: 'select',
+            label: 'Heel-to-Toe Walking',
+            options: [
+              { value: 'normal', label: 'Normal' },
+              { value: 'mild-ataxia', label: 'Mild Ataxia' },
+              { value: 'moderate-ataxia', label: 'Moderate Ataxia' },
+              { value: 'severe-ataxia', label: 'Severe Ataxia' }
+            ]
+          }
+        ]
+      },
+      {
+        id: 'reflex-testing',
+        title: 'Reflex Testing (Secondary)',
+        fields: [
+          {
+            id: 'biceps-reflex',
+            type: 'select',
+            label: 'Biceps Reflex',
+            options: [
+              { value: '0', label: '0 - Absent' },
+              { value: '1', label: '1+ - Diminished' },
+              { value: '2', label: '2+ - Normal' },
+              { value: '3', label: '3+ - Increased' },
+              { value: '4', label: '4+ - Hyperactive' }
+            ]
+          },
+          {
+            id: 'triceps-reflex',
+            type: 'select',
+            label: 'Triceps Reflex',
+            options: [
+              { value: '0', label: '0 - Absent' },
+              { value: '1', label: '1+ - Diminished' },
+              { value: '2', label: '2+ - Normal' },
+              { value: '3', label: '3+ - Increased' },
+              { value: '4', label: '4+ - Hyperactive' }
+            ]
+          },
+          {
+            id: 'patellar-reflex',
+            type: 'select',
+            label: 'Patellar Reflex',
+            options: [
+              { value: '0', label: '0 - Absent' },
+              { value: '1', label: '1+ - Diminished' },
+              { value: '2', label: '2+ - Normal' },
+              { value: '3', label: '3+ - Increased' },
+              { value: '4', label: '4+ - Hyperactive' }
+            ]
+          },
+          {
+            id: 'achilles-reflex',
+            type: 'select',
+            label: 'Achilles Reflex',
+            options: [
+              { value: '0', label: '0 - Absent' },
+              { value: '1', label: '1+ - Diminished' },
+              { value: '2', label: '2+ - Normal' },
+              { value: '3', label: '3+ - Increased' },
+              { value: '4', label: '4+ - Hyperactive' }
+            ]
+          }
+        ]
+      },
+      {
+        id: 'sensory-testing',
+        title: 'Sensory Testing (Secondary)',
+        fields: [
+          {
+            id: 'light-touch',
+            type: 'select',
+            label: 'Light Touch',
+            options: [
+              { value: 'intact', label: 'Intact' },
+              { value: 'impaired', label: 'Impaired' },
+              { value: 'absent', label: 'Absent' }
+            ]
+          },
+          {
+            id: 'proprioception',
+            type: 'select',
+            label: 'Proprioception',
+            options: [
+              { value: 'intact', label: 'Intact' },
+              { value: 'impaired', label: 'Impaired' },
+              { value: 'absent', label: 'Absent' }
+            ]
+          }
+        ]
+      }
+    ],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  },
+
   // Respiratory Initial Evaluation
   {
     id: 'respiratory-initial',
@@ -345,202 +638,6 @@ export const defaultTemplates: ClinicalTemplate[] = [
             type: 'number',
             label: '6-Minute Walk Test Distance',
             unit: 'meters'
-          }
-        ]
-      }
-    ],
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  },
-
-  // Neurological Initial Evaluation
-  {
-    id: 'neuro-initial',
-    name: 'Neurological Initial Evaluation',
-    type: 'initial-evaluation',
-    specialty: 'neuro',
-    sections: [
-      {
-        id: 'systems-review',
-        title: 'Systems Review',
-        fields: [
-          {
-            id: 'cardiovascular',
-            type: 'checkbox',
-            label: 'Cardiovascular',
-            defaultValue: false
-          },
-          {
-            id: 'cognitive-status',
-            type: 'checkbox',
-            label: 'Cognitive Status',
-            defaultValue: true
-          },
-          {
-            id: 'cranial-nerves',
-            type: 'checkbox',
-            label: 'Cranial Nerves',
-            defaultValue: true
-          },
-          {
-            id: 'neurological',
-            type: 'checkbox',
-            label: 'Neurological',
-            defaultValue: true
-          }
-        ]
-      },
-      {
-        id: 'reflex-testing',
-        title: 'Reflex Testing',
-        fields: [
-          {
-            id: 'biceps-reflex',
-            type: 'select',
-            label: 'Biceps Reflex',
-            options: [
-              { value: '0', label: '0 - Absent' },
-              { value: '1', label: '1+ - Diminished' },
-              { value: '2', label: '2+ - Normal' },
-              { value: '3', label: '3+ - Increased' },
-              { value: '4', label: '4+ - Hyperactive' }
-            ]
-          },
-          {
-            id: 'triceps-reflex',
-            type: 'select',
-            label: 'Triceps Reflex',
-            options: [
-              { value: '0', label: '0 - Absent' },
-              { value: '1', label: '1+ - Diminished' },
-              { value: '2', label: '2+ - Normal' },
-              { value: '3', label: '3+ - Increased' },
-              { value: '4', label: '4+ - Hyperactive' }
-            ]
-          },
-          {
-            id: 'patellar-reflex',
-            type: 'select',
-            label: 'Patellar Reflex',
-            options: [
-              { value: '0', label: '0 - Absent' },
-              { value: '1', label: '1+ - Diminished' },
-              { value: '2', label: '2+ - Normal' },
-              { value: '3', label: '3+ - Increased' },
-              { value: '4', label: '4+ - Hyperactive' }
-            ]
-          },
-          {
-            id: 'achilles-reflex',
-            type: 'select',
-            label: 'Achilles Reflex',
-            options: [
-              { value: '0', label: '0 - Absent' },
-              { value: '1', label: '1+ - Diminished' },
-              { value: '2', label: '2+ - Normal' },
-              { value: '3', label: '3+ - Increased' },
-              { value: '4', label: '4+ - Hyperactive' }
-            ]
-          }
-        ]
-      },
-      {
-        id: 'sensory-testing',
-        title: 'Sensory Testing',
-        fields: [
-          {
-            id: 'light-touch',
-            type: 'select',
-            label: 'Light Touch',
-            options: [
-              { value: 'intact', label: 'Intact' },
-              { value: 'impaired', label: 'Impaired' },
-              { value: 'absent', label: 'Absent' }
-            ]
-          },
-          {
-            id: 'proprioception',
-            type: 'select',
-            label: 'Proprioception',
-            options: [
-              { value: 'intact', label: 'Intact' },
-              { value: 'impaired', label: 'Impaired' },
-              { value: 'absent', label: 'Absent' }
-            ]
-          }
-        ]
-      },
-      {
-        id: 'coordination-testing',
-        title: 'Coordination Testing',
-        fields: [
-          {
-            id: 'finger-nose',
-            type: 'select',
-            label: 'Finger-to-Nose Test',
-            options: [
-              { value: 'normal', label: 'Normal' },
-              { value: 'mild-dysmetria', label: 'Mild Dysmetria' },
-              { value: 'moderate-dysmetria', label: 'Moderate Dysmetria' },
-              { value: 'severe-dysmetria', label: 'Severe Dysmetria' }
-            ]
-          },
-          {
-            id: 'heel-toe',
-            type: 'select',
-            label: 'Heel-to-Toe Walking',
-            options: [
-              { value: 'normal', label: 'Normal' },
-              { value: 'mild-ataxia', label: 'Mild Ataxia' },
-              { value: 'moderate-ataxia', label: 'Moderate Ataxia' },
-              { value: 'severe-ataxia', label: 'Severe Ataxia' }
-            ]
-          }
-        ]
-      },
-      {
-        id: 'balance-gait',
-        title: 'Balance & Gait Assessment',
-        fields: [
-          {
-            id: 'tug-score',
-            type: 'number',
-            label: 'Timed Up and Go (TUG)',
-            unit: 'seconds'
-          },
-          {
-            id: 'berg-balance',
-            type: 'number',
-            label: 'Berg Balance Scale',
-            min: 0,
-            max: 56
-          }
-        ]
-      },
-      {
-        id: 'outcome-measures',
-        title: 'Neurological Outcome Measures',
-        fields: [
-          {
-            id: 'modified-rankin',
-            type: 'select',
-            label: 'Modified Rankin Scale (mRS)',
-            options: [
-              { value: '0', label: '0 - No symptoms' },
-              { value: '1', label: '1 - No significant disability' },
-              { value: '2', label: '2 - Slight disability' },
-              { value: '3', label: '3 - Moderate disability' },
-              { value: '4', label: '4 - Moderately severe disability' },
-              { value: '5', label: '5 - Severe disability' },
-              { value: '6', label: '6 - Dead' }
-            ]
-          },
-          {
-            id: 'fim-score',
-            type: 'number',
-            label: 'Functional Independence Measure (FIM)',
-            min: 18,
-            max: 126
           }
         ]
       }

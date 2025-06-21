@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Save, ArrowLeft } from 'lucide-react';
 import { SOAPNote, Patient } from '@/types/clinical';
 import { TemplateFormBuilder } from './TemplateFormBuilder';
+import { BodyChart } from './BodyChart';
 import { useSOAPNotes } from '@/hooks/useSOAPNotes';
 
 interface SOAPNoteFormProps {
@@ -35,12 +36,15 @@ export const SOAPNoteForm = ({ patient, template, onSave, onCancel, isLoading }:
     location: 'opd' as const,
     referredBy: '',
     reasonForReferral: '',
+    diagnosis: '',
+    icd10Code: '',
     
     // Subjective
     chiefComplaint: '',
     historyOfPresentIllness: '',
     symptoms: [] as string[],
     otherSymptoms: '',
+    bodyChartAreas: [] as string[],
     
     // Objective
     vitalSigns: {
@@ -52,18 +56,17 @@ export const SOAPNoteForm = ({ patient, template, onSave, onCancel, isLoading }:
     },
     observations: '',
     
-    // Assessment
-    summary: '',
-    impairments: [] as string[],
-    prognosis: '',
+    // Action (Management)
+    interventionsPerformed: [] as string[],
+    managementProvided: '',
+    homeProgram: '',
     
     // Plan
     shortTermGoals: [] as string[],
     longTermGoals: [] as string[],
-    interventions: [] as string[],
+    nextVisitFocus: [] as string[],
     frequency: '',
-    duration: '',
-    nextVisitFocus: [] as string[]
+    duration: ''
   });
 
   // Template-specific form data
@@ -74,6 +77,40 @@ export const SOAPNoteForm = ({ patient, template, onSave, onCancel, isLoading }:
     'Swelling', 'Instability', 'Fatigue', 'Balance issues'
   ];
 
+  const getCommonInterventions = () => {
+    switch (template.specialty) {
+      case 'msk':
+        return [
+          'Manual Therapy', 'Joint Mobilization', 'Soft Tissue Mobilization',
+          'Therapeutic Exercise', 'Strengthening Exercises', 'Stretching',
+          'Postural Training', 'Gait Training', 'Balance Training',
+          'Patient Education', 'Home Exercise Program', 'Ergonomic Advice',
+          'Hot/Cold Therapy', 'Ultrasound', 'TENS', 'Taping'
+        ];
+      case 'respiratory':
+        return [
+          'Breathing Exercises', 'Airway Clearance', 'Postural Drainage',
+          'Percussion & Vibration', 'Active Cycle Breathing', 'Huffing',
+          'Incentive Spirometry', 'Exercise Training', 'Walking Program',
+          'Patient Education', 'Energy Conservation', 'Positioning'
+        ];
+      case 'neuro':
+        return [
+          'Gait Training', 'Balance Training', 'Transfer Training',
+          'Coordination Exercises', 'Functional Training', 'ADL Training',
+          'Strengthening Exercises', 'Range of Motion', 'Stretching',
+          'Sensory Re-education', 'Patient Education', 'Family Training',
+          'Assistive Device Training', 'Environmental Modification'
+        ];
+      default:
+        return [
+          'Therapeutic Exercise', 'Manual Therapy', 'Patient Education',
+          'Gait Training', 'Balance Training', 'Strengthening',
+          'Stretching', 'Functional Training', 'Home Program'
+        ];
+    }
+  };
+
   const handleSymptomToggle = (symptom: string) => {
     setFormData(prev => ({
       ...prev,
@@ -81,6 +118,19 @@ export const SOAPNoteForm = ({ patient, template, onSave, onCancel, isLoading }:
         ? prev.symptoms.filter(s => s !== symptom)
         : [...prev.symptoms, symptom]
     }));
+  };
+
+  const handleInterventionToggle = (intervention: string) => {
+    setFormData(prev => ({
+      ...prev,
+      interventionsPerformed: prev.interventionsPerformed.includes(intervention)
+        ? prev.interventionsPerformed.filter(i => i !== intervention)
+        : [...prev.interventionsPerformed, intervention]
+    }));
+  };
+
+  const handleBodyChartChange = (areas: string[]) => {
+    setFormData(prev => ({ ...prev, bodyChartAreas: areas }));
   };
 
   const handleTemplateFieldChange = (fieldId: string, value: any) => {
@@ -103,11 +153,14 @@ export const SOAPNoteForm = ({ patient, template, onSave, onCancel, isLoading }:
       location: formData.location,
       referredBy: formData.referredBy || undefined,
       reasonForReferral: formData.reasonForReferral || undefined,
+      diagnosis: formData.diagnosis || undefined,
+      icd10Code: formData.icd10Code || undefined,
       subjective: {
         chiefComplaint: formData.chiefComplaint,
         historyOfPresentIllness: formData.historyOfPresentIllness,
         symptoms: formData.symptoms,
-        otherSymptoms: formData.otherSymptoms || undefined
+        otherSymptoms: formData.otherSymptoms || undefined,
+        bodyChart: formData.bodyChartAreas
       },
       objective: {
         vitalSigns: {
@@ -121,17 +174,16 @@ export const SOAPNoteForm = ({ patient, template, onSave, onCancel, isLoading }:
         measurements: templateFormData,
         tests: {}
       },
-      assessment: {
-        summary: formData.summary,
-        impairments: formData.impairments,
-        prognosis: formData.prognosis || undefined
+      action: {
+        interventionsPerformed: formData.interventionsPerformed,
+        managementProvided: formData.managementProvided,
+        homeProgram: formData.homeProgram || undefined
       },
       plan: {
         goals: {
           shortTerm: formData.shortTermGoals,
           longTerm: formData.longTermGoals
         },
-        interventions: formData.interventions,
         frequency: formData.frequency || undefined,
         duration: formData.duration || undefined,
         nextVisitFocus: formData.nextVisitFocus
@@ -218,12 +270,22 @@ export const SOAPNoteForm = ({ patient, template, onSave, onCancel, isLoading }:
                   onChange={(e) => setFormData(prev => ({ ...prev, referredBy: e.target.value }))}
                 />
               </div>
-              <div className="md:col-span-2">
-                <Label htmlFor="reasonForReferral">Reason for Referral</Label>
+              <div>
+                <Label htmlFor="diagnosis">Primary Diagnosis</Label>
                 <Input
-                  id="reasonForReferral"
-                  value={formData.reasonForReferral}
-                  onChange={(e) => setFormData(prev => ({ ...prev, reasonForReferral: e.target.value }))}
+                  id="diagnosis"
+                  value={formData.diagnosis}
+                  onChange={(e) => setFormData(prev => ({ ...prev, diagnosis: e.target.value }))}
+                  placeholder="e.g., Low back pain"
+                />
+              </div>
+              <div>
+                <Label htmlFor="icd10Code">ICD-10 Code</Label>
+                <Input
+                  id="icd10Code"
+                  value={formData.icd10Code}
+                  onChange={(e) => setFormData(prev => ({ ...prev, icd10Code: e.target.value }))}
+                  placeholder="e.g., M54.5"
                 />
               </div>
             </>
@@ -274,6 +336,12 @@ export const SOAPNoteForm = ({ patient, template, onSave, onCancel, isLoading }:
               rows={4}
             />
           </div>
+
+          {/* Body Chart */}
+          <BodyChart
+            markedAreas={formData.bodyChartAreas}
+            onAreasChange={handleBodyChartChange}
+          />
         </CardContent>
       </Card>
 
@@ -373,21 +441,47 @@ export const SOAPNoteForm = ({ patient, template, onSave, onCancel, isLoading }:
         />
       )}
 
-      {/* Assessment */}
+      {/* Action (Management) */}
       <Card>
         <CardHeader>
-          <CardTitle>A - Assessment</CardTitle>
+          <CardTitle>A - Action (Management Provided)</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
           <div>
-            <Label htmlFor="summary">Clinical Assessment Summary</Label>
+            <Label>Interventions Performed</Label>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mt-2">
+              {getCommonInterventions().map((intervention) => (
+                <div key={intervention} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={intervention}
+                    checked={formData.interventionsPerformed.includes(intervention)}
+                    onCheckedChange={() => handleInterventionToggle(intervention)}
+                  />
+                  <Label htmlFor={intervention} className="text-sm">{intervention}</Label>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <Label htmlFor="managementProvided">Additional Management Details</Label>
             <Textarea
-              id="summary"
-              value={formData.summary}
-              onChange={(e) => setFormData(prev => ({ ...prev, summary: e.target.value }))}
-              placeholder="Professional interpretation of findings and diagnosis..."
-              rows={4}
-              required
+              id="managementProvided"
+              value={formData.managementProvided}
+              onChange={(e) => setFormData(prev => ({ ...prev, managementProvided: e.target.value }))}
+              placeholder="Detailed description of management provided..."
+              rows={3}
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="homeProgram">Home Program/Instructions</Label>
+            <Textarea
+              id="homeProgram"
+              value={formData.homeProgram}
+              onChange={(e) => setFormData(prev => ({ ...prev, homeProgram: e.target.value }))}
+              placeholder="Exercise program, activity modifications, precautions..."
+              rows={2}
             />
           </div>
         </CardContent>
