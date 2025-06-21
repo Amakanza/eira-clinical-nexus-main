@@ -88,7 +88,7 @@ export interface User {
   email: string;
   firstName: string;
   lastName: string;
-  role: 'admin' | 'clinician' | 'nurse' | 'reception';
+  role: 'admin' | 'clinician' | 'supervisor';
   department?: string;
   license?: string;
   signature?: string;

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,9 +8,21 @@ import { TemplateSelector } from '@/components/clinical/TemplateSelector';
 import { SOAPNoteForm } from '@/components/clinical/SOAPNoteForm';
 import { useSOAPNotes } from '@/hooks/useSOAPNotes';
 import { usePatients } from '@/hooks/usePatients';
-import { Patient } from '@/types/clinical';
+import { Patient, SOAPNote } from '@/types/clinical';
 
 type ViewMode = 'list' | 'template-selector' | 'note-form' | 'patient-selector';
+
+interface Episode {
+  id: string;
+  patientId: string;
+  specialty: string;
+  diagnosis: string;
+  icd10Code: string;
+  startDate: string;
+  endDate: string;
+  noteCount: number;
+  notes: SOAPNote[];
+}
 
 const ClinicalNotes = () => {
   const [viewMode, setViewMode] = useState<ViewMode>('list');
@@ -60,7 +71,7 @@ const ClinicalNotes = () => {
   };
 
   // Group notes by episodes (simplified version - same patient, similar conditions)
-  const groupNotesByEpisodes = (notes: any[]) => {
+  const groupNotesByEpisodes = (notes: SOAPNote[]): Episode[] => {
     const grouped = notes.reduce((acc, note) => {
       const key = `${note.patientId}-${note.specialty}`;
       if (!acc[key]) {
@@ -68,18 +79,18 @@ const ClinicalNotes = () => {
       }
       acc[key].push(note);
       return acc;
-    }, {} as Record<string, any[]>);
+    }, {} as Record<string, SOAPNote[]>);
 
-    return Object.entries(grouped).map(([key, notes]) => ({
+    return Object.entries(grouped).map(([key, episodeNotes]) => ({
       id: key,
-      patientId: notes[0].patientId,
-      specialty: notes[0].specialty,
-      diagnosis: notes[0].diagnosis || 'No diagnosis recorded',
-      icd10Code: notes[0].icd10Code || '',
-      startDate: notes[notes.length - 1].date, // Oldest note
-      endDate: notes[0].date, // Newest note
-      noteCount: notes.length,
-      notes: notes.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+      patientId: episodeNotes[0].patientId,
+      specialty: episodeNotes[0].specialty,
+      diagnosis: episodeNotes[0].diagnosis || 'No diagnosis recorded',
+      icd10Code: episodeNotes[0].icd10Code || '',
+      startDate: episodeNotes[episodeNotes.length - 1].date, // Oldest note
+      endDate: episodeNotes[0].date, // Newest note
+      noteCount: episodeNotes.length,
+      notes: episodeNotes.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
     }));
   };
 
@@ -210,7 +221,7 @@ const ClinicalNotes = () => {
 
                             {/* Individual Notes in Episode */}
                             <div className="pl-4 border-l-2 border-gray-200 space-y-2">
-                              {episode.notes.slice(0, 3).map((note: any) => (
+                              {episode.notes.slice(0, 3).map((note: SOAPNote) => (
                                 <div key={note.id} className="text-sm">
                                   <div className="flex justify-between items-center">
                                     <div className="flex items-center space-x-2">

@@ -11,8 +11,11 @@ import {
   Home,
   Clock,
   Archive,
-  Shield
+  Shield,
+  DollarSign,
+  Receipt
 } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -20,13 +23,18 @@ interface SidebarProps {
 }
 
 const navigation = [
-  { name: 'Dashboard', href: '/', icon: Home },
-  { name: 'Patients', href: '/patients', icon: Users },
-  { name: 'Clinical Notes', href: '/notes', icon: FileText },
-  { name: 'Appointments', href: '/appointments', icon: Calendar },
-  { name: 'Recent Activity', href: '/activity', icon: Clock },
-  { name: 'Reports', href: '/reports', icon: BarChart3 },
-  { name: 'Archive', href: '/archive', icon: Archive },
+  { name: 'Dashboard', href: '/', icon: Home, roles: ['admin', 'clinician', 'supervisor'] },
+  { name: 'Patients', href: '/patients', icon: Users, roles: ['admin', 'clinician', 'supervisor'] },
+  { name: 'Clinical Notes', href: '/notes', icon: FileText, roles: ['admin', 'clinician', 'supervisor'] },
+  { name: 'Appointments', href: '/appointments', icon: Calendar, roles: ['admin', 'clinician', 'supervisor'] },
+  { name: 'Recent Activity', href: '/activity', icon: Clock, roles: ['admin', 'clinician', 'supervisor'] },
+  { name: 'Reports', href: '/reports', icon: BarChart3, roles: ['admin', 'clinician', 'supervisor'] },
+  { name: 'Archive', href: '/archive', icon: Archive, roles: ['admin', 'clinician', 'supervisor'] },
+];
+
+const billingNavigation = [
+  { name: 'Billing', href: '/billing', icon: DollarSign },
+  { name: 'Reports', href: '/billing/reports', icon: Receipt },
 ];
 
 const adminNavigation = [
@@ -36,9 +44,15 @@ const adminNavigation = [
 
 export const Sidebar = ({ isOpen, currentPath }: SidebarProps) => {
   const location = useLocation();
+  const { currentUser, hasPermission } = useAuth();
   const activePath = currentPath || location.pathname;
   
   const isActive = (path: string) => activePath === path;
+
+  const canViewItem = (roles?: string[]) => {
+    if (!roles || !currentUser) return true;
+    return roles.includes(currentUser.role);
+  };
 
   return (
     <aside
@@ -49,7 +63,7 @@ export const Sidebar = ({ isOpen, currentPath }: SidebarProps) => {
     >
       {/* Navigation */}
       <nav className="flex-1 px-2 py-4 space-y-1">
-        {navigation.map((item) => {
+        {navigation.filter(item => canViewItem(item.roles)).map((item) => {
           const Icon = item.icon;
           return (
             <Link key={item.name} to={item.href}>
@@ -68,8 +82,36 @@ export const Sidebar = ({ isOpen, currentPath }: SidebarProps) => {
           );
         })}
 
+        {/* Billing Section - Only for Admin and Supervisor */}
+        {hasPermission('view_billing') && isOpen && (
+          <div className="pt-6">
+            <h3 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+              Billing
+            </h3>
+            <div className="mt-2 space-y-1">
+              {billingNavigation.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <Link key={item.name} to={item.href}>
+                    <Button
+                      variant={isActive(item.href) ? 'secondary' : 'ghost'}
+                      className={cn(
+                        'w-full justify-start h-10',
+                        isActive(item.href) && 'bg-blue-50 text-blue-700 border-blue-200'
+                      )}
+                    >
+                      <Icon className="h-5 w-5 mr-3" />
+                      <span className="text-sm font-medium">{item.name}</span>
+                    </Button>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         {/* Admin Section */}
-        {isOpen && (
+        {currentUser?.role === 'admin' && isOpen && (
           <div className="pt-6">
             <h3 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
               Administration
