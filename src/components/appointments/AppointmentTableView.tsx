@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, Clock, User } from 'lucide-react';
 import { Appointment, TimeSlot, User as ClinicianType } from '@/types/clinical';
 import { useAppointments } from '@/hooks/useAppointments';
@@ -19,7 +20,7 @@ export const AppointmentTableView: React.FC<AppointmentTableViewProps> = ({
   onAppointmentClick,
   onNewAppointment
 }) => {
-  const { appointments, timeSlots, clinicians } = useAppointments();
+  const { appointments, timeSlots, clinicians, updateAppointment } = useAppointments();
 
   const getAppointmentsForSlotAndClinician = (timeSlotId: string, clinicianId: string): Appointment[] => {
     return appointments.filter(apt => 
@@ -48,6 +49,14 @@ export const AppointmentTableView: React.FC<AppointmentTableViewProps> = ({
     }
   };
 
+  const handleStatusChange = async (appointmentId: string, newStatus: string) => {
+    try {
+      await updateAppointment(appointmentId, { status: newStatus as Appointment['status'] });
+    } catch (error) {
+      console.error('Failed to update appointment status:', error);
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Early Morning Section */}
@@ -70,10 +79,9 @@ export const AppointmentTableView: React.FC<AppointmentTableViewProps> = ({
               {getEarlyMorningAppointments().map(apt => (
                 <div
                   key={apt.id}
-                  onClick={() => onAppointmentClick(apt)}
                   className="p-3 border rounded-lg hover:bg-gray-50 cursor-pointer flex justify-between items-center"
                 >
-                  <div>
+                  <div onClick={() => onAppointmentClick(apt)} className="flex-1">
                     <p className="font-medium">{apt.patientName}</p>
                     <div className="flex items-center text-sm text-gray-600 mt-1">
                       <Clock className="h-4 w-4 mr-1" />
@@ -86,9 +94,23 @@ export const AppointmentTableView: React.FC<AppointmentTableViewProps> = ({
                       </div>
                     )}
                   </div>
-                  <Badge className={getStatusColor(apt.status)}>
-                    {apt.status}
-                  </Badge>
+                  <div className="flex items-center space-x-2">
+                    <Select
+                      value={apt.status}
+                      onValueChange={(value) => handleStatusChange(apt.id, value)}
+                    >
+                      <SelectTrigger className="w-32">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="scheduled">Scheduled</SelectItem>
+                        <SelectItem value="in-progress">In Progress</SelectItem>
+                        <SelectItem value="completed">Completed</SelectItem>
+                        <SelectItem value="no-show">No Show</SelectItem>
+                        <SelectItem value="cancelled">Cancelled</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               ))}
             </div>
@@ -130,18 +152,34 @@ export const AppointmentTableView: React.FC<AppointmentTableViewProps> = ({
                           {slotAppointments.map(apt => (
                             <div
                               key={apt.id}
-                              onClick={() => onAppointmentClick(apt)}
-                              className="p-2 bg-blue-50 rounded border cursor-pointer hover:bg-blue-100 transition-colors"
+                              className="p-2 bg-blue-50 rounded border hover:bg-blue-100 transition-colors"
                             >
-                              <div className="flex justify-between items-start">
-                                <div>
-                                  <p className="font-medium text-sm">{apt.patientName}</p>
-                                  <p className="text-xs text-gray-600">{apt.roomName}</p>
+                              <div 
+                                onClick={() => onAppointmentClick(apt)}
+                                className="cursor-pointer"
+                              >
+                                <div className="flex justify-between items-start mb-2">
+                                  <div>
+                                    <p className="font-medium text-sm">{apt.patientName}</p>
+                                    <p className="text-xs text-gray-600">{apt.roomName}</p>
+                                  </div>
                                 </div>
-                                <Badge className={`text-xs ${getStatusColor(apt.status)}`}>
-                                  {apt.status}
-                                </Badge>
                               </div>
+                              <Select
+                                value={apt.status}
+                                onValueChange={(value) => handleStatusChange(apt.id, value)}
+                              >
+                                <SelectTrigger className="w-full h-6 text-xs">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="scheduled">Scheduled</SelectItem>
+                                  <SelectItem value="in-progress">In Progress</SelectItem>
+                                  <SelectItem value="completed">Completed</SelectItem>
+                                  <SelectItem value="no-show">No Show</SelectItem>
+                                  <SelectItem value="cancelled">Cancelled</SelectItem>
+                                </SelectContent>
+                              </Select>
                             </div>
                           ))}
                           

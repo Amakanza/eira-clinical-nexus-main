@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -21,7 +22,7 @@ export const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
 }) => {
   const { appointments, timeSlots, specialEvents } = useAppointments();
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [viewMode, setViewMode] = useState<'day' | 'week' | 'table' | 'month'>('table');
+  const [viewMode, setViewMode] = useState<'day' | 'week' | 'month'>('day');
   const [isSpecialEventFormOpen, setIsSpecialEventFormOpen] = useState(false);
   const [selectedSpecialEvent, setSelectedSpecialEvent] = useState<SpecialEvent | undefined>();
 
@@ -36,7 +37,7 @@ export const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
   const navigateDate = (direction: 'prev' | 'next') => {
     if (viewMode === 'day') {
       setCurrentDate(prev => direction === 'next' ? addDays(prev, 1) : subDays(prev, 1));
-    } else if (viewMode === 'week' || viewMode === 'table') {
+    } else if (viewMode === 'week') {
       setCurrentDate(prev => direction === 'next' ? addWeeks(prev, 1) : subWeeks(prev, 1));
     } else if (viewMode === 'month') {
       setCurrentDate(prev => direction === 'next' ? addMonths(prev, 1) : subMonths(prev, 1));
@@ -50,7 +51,7 @@ export const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
 
   const handleDateClick = (date: Date) => {
     setCurrentDate(date);
-    setViewMode('table');
+    setViewMode('day');
   };
 
   const getAppointmentsForTimeSlot = (date: string, timeSlotId: string): Appointment[] => {
@@ -71,11 +72,33 @@ export const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
 
   const renderDayView = () => {
     const dateStr = formatDateForComparison(currentDate);
-    const dayAppointments = getAppointmentsForDate(dateStr);
-    const earlyMorningAppts = getEarlyMorningAppointments(dateStr);
+    return (
+      <AppointmentTableView
+        date={dateStr}
+        onAppointmentClick={onAppointmentClick}
+        onNewAppointment={(date, timeSlot, clinicianId) => 
+          onNewAppointment(date, timeSlot, clinicianId)
+        }
+      />
+    );
+  };
+
+  const renderWeekView = () => {
+    const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 });
+    const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
 
     return (
       <div className="space-y-4">
+        {/* Week days headers */}
+        <div className="grid grid-cols-8 gap-2">
+          <div className="font-medium text-sm p-2">Time</div>
+          {weekDays.map(day => (
+            <div key={formatDateForComparison(day)} className="font-medium text-sm p-2 text-center">
+              {format(day, 'EEE dd')}
+            </div>
+          ))}
+        </div>
+
         {/* Early Morning Section */}
         <Card>
           <CardHeader className="pb-3">
@@ -84,44 +107,40 @@ export const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {earlyMorningAppts.length > 0 ? (
-              <div className="space-y-2">
-                {earlyMorningAppts.map(apt => (
-                  <div
-                    key={apt.id}
-                    onClick={() => onAppointmentClick(apt)}
-                    className="p-3 border rounded-lg hover:bg-gray-50 cursor-pointer"
-                  >
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <p className="font-medium">{apt.patientName}</p>
-                        <div className="flex items-center text-sm text-gray-600 mt-1">
-                          <Clock className="h-4 w-4 mr-1" />
-                          {apt.customStartTime} - {apt.customEndTime}
-                        </div>
-                        <div className="flex items-center text-sm text-gray-600 mt-1">
-                          <User className="h-4 w-4 mr-1" />
-                          {apt.clinicianName}
-                        </div>
+            <div className="grid grid-cols-8 gap-2">
+              <div className="text-sm font-medium">Early</div>
+              {weekDays.map(day => {
+                const dateStr = formatDateForComparison(day);
+                const earlyAppts = getEarlyMorningAppointments(dateStr);
+                
+                return (
+                  <div key={dateStr} className="space-y-1">
+                    {earlyAppts.map(apt => (
+                      <div
+                        key={apt.id}
+                        onClick={() => onAppointmentClick(apt)}
+                        className="p-1 bg-blue-100 rounded text-xs cursor-pointer hover:bg-blue-200"
+                      >
+                        <p className="font-medium truncate">{apt.patientName}</p>
+                        <p className="text-gray-600">
+                          {apt.customStartTime}-{apt.customEndTime}
+                        </p>
                       </div>
-                      <Badge variant="secondary">{apt.type}</Badge>
-                    </div>
+                    ))}
+                    {earlyAppts.length === 0 && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-6 w-full text-xs"
+                        onClick={() => onNewAppointment(dateStr)}
+                      >
+                        <Plus className="h-3 w-3" />
+                      </Button>
+                    )}
                   </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-4">
-                <p className="text-gray-500 mb-2">No early morning appointments</p>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => onNewAppointment(dateStr)}
-                >
-                  <Plus className="h-4 w-4 mr-1" />
-                  Add Early Morning
-                </Button>
-              </div>
-            )}
+                );
+              })}
+            </div>
           </CardContent>
         </Card>
 
@@ -133,126 +152,52 @@ export const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3">
-              {timeSlots.map(slot => {
-                const slotAppointments = getAppointmentsForTimeSlot(dateStr, slot.id);
-                
-                return (
-                  <div key={slot.id} className="border-l-4 border-blue-200 pl-4">
-                    <div className="flex justify-between items-center mb-2">
-                      <div className="font-medium text-sm">
-                        {slot.startTime} - {slot.endTime}
-                      </div>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => onNewAppointment(dateStr, slot.id)}
-                      >
-                        <Plus className="h-4 w-4" />
-                      </Button>
-                    </div>
+            <div className="space-y-2">
+              {timeSlots.map(slot => (
+                <div key={slot.id} className="grid grid-cols-8 gap-2 py-2 border-b border-gray-100">
+                  <div className="text-sm font-medium">
+                    {slot.startTime}
+                  </div>
+                  {weekDays.map(day => {
+                    const dateStr = formatDateForComparison(day);
+                    const dayAppointments = getAppointmentsForTimeSlot(dateStr, slot.id);
                     
-                    {slotAppointments.length > 0 ? (
-                      <div className="grid gap-2">
-                        {slotAppointments.map(apt => (
+                    return (
+                      <div key={`${dateStr}-${slot.id}`} className="space-y-1">
+                        {dayAppointments.slice(0, 2).map(apt => (
                           <div
                             key={apt.id}
                             onClick={() => onAppointmentClick(apt)}
-                            className="p-2 bg-blue-50 rounded-md hover:bg-blue-100 cursor-pointer border"
+                            className="p-1 bg-blue-100 rounded text-xs cursor-pointer hover:bg-blue-200"
                           >
-                            <div className="flex justify-between items-start">
-                              <div>
-                                <p className="font-medium text-sm">{apt.patientName}</p>
-                                <div className="flex items-center text-xs text-gray-600 mt-1">
-                                  <User className="h-3 w-3 mr-1" />
-                                  {apt.clinicianName}
-                                </div>
-                                <div className="flex items-center text-xs text-gray-600">
-                                  <MapPin className="h-3 w-3 mr-1" />
-                                  {apt.roomName}
-                                </div>
-                              </div>
-                              <Badge variant={apt.status === 'completed' ? 'default' : 'secondary'}>
-                                {apt.status}
-                              </Badge>
-                            </div>
+                            <p className="font-medium truncate">{apt.patientName}</p>
+                            <p className="text-gray-600 truncate">{apt.clinicianName}</p>
                           </div>
                         ))}
+                        {dayAppointments.length > 2 && (
+                          <p className="text-xs text-gray-500">
+                            +{dayAppointments.length - 2} more
+                          </p>
+                        )}
+                        {dayAppointments.length === 0 && (
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-6 w-full text-xs"
+                            onClick={() => onNewAppointment(dateStr, slot.id)}
+                          >
+                            <Plus className="h-3 w-3" />
+                          </Button>
+                        )}
                       </div>
-                    ) : (
-                      <p className="text-xs text-gray-500">No appointments</p>
-                    )}
-                  </div>
-                );
-              })}
+                    );
+                  })}
+                </div>
+              ))}
             </div>
           </CardContent>
         </Card>
       </div>
-    );
-  };
-
-  const renderWeekView = () => {
-    const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 });
-    const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
-
-    return (
-      <div className="grid grid-cols-7 gap-2">
-        {weekDays.map(day => {
-          const dateStr = formatDateForComparison(day);
-          const dayAppointments = getAppointmentsForDate(dateStr);
-          
-          return (
-            <Card key={dateStr} className="min-h-[200px]">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm">
-                  {format(day, 'EEE dd')}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <div className="space-y-1">
-                  {dayAppointments.slice(0, 3).map(apt => (
-                    <div
-                      key={apt.id}
-                      onClick={() => onAppointmentClick(apt)}
-                      className="p-1 bg-blue-100 rounded text-xs cursor-pointer hover:bg-blue-200"
-                    >
-                      <p className="font-medium truncate">{apt.patientName}</p>
-                      <p className="text-gray-600">
-                        {apt.timeSlot ? 
-                          apt.timeSlot.startTime : 
-                          `${apt.customStartTime}-${apt.customEndTime}`
-                        }
-                      </p>
-                    </div>
-                  ))}
-                  {dayAppointments.length > 3 && (
-                    <p className="text-xs text-gray-500">
-                      +{dayAppointments.length - 3} more
-                    </p>
-                  )}
-                  {dayAppointments.length === 0 && (
-                    <p className="text-xs text-gray-400">No appointments</p>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
-    );
-  };
-
-  const renderTableView = () => {
-    const dateStr = formatDateForComparison(currentDate);
-    return (
-      <AppointmentTableView
-        date={dateStr}
-        onAppointmentClick={onAppointmentClick}
-        onNewAppointment={(date, timeSlot, clinicianId) => 
-          onNewAppointment(date, timeSlot, clinicianId)
-        }
-      />
     );
   };
 
@@ -271,7 +216,6 @@ export const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
       case 'day':
         return format(currentDate, 'EEEE, MMMM d, yyyy');
       case 'week':
-      case 'table':
         return `Week of ${format(startOfWeek(currentDate, { weekStartsOn: 1 }), 'MMM d, yyyy')}`;
       case 'month':
         return format(currentDate, 'MMMM yyyy');
@@ -281,27 +225,28 @@ export const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
+      {/* Date Title */}
+      <div className="text-center">
+        <h2 className="text-2xl font-semibold">
+          {getViewTitle()}
+        </h2>
+      </div>
+
       {/* Navigation Header */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <div className="flex items-center space-x-2">
-            <Button variant="outline" size="sm" onClick={() => navigateDate('prev')}>
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => navigateDate('next')}>
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-          
-          <h2 className="text-xl font-semibold">
-            {getViewTitle()}
-          </h2>
+        <div className="flex items-center space-x-2">
+          <Button variant="outline" size="sm" onClick={() => navigateDate('prev')}>
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => navigateDate('next')}>
+            <ChevronRight className="h-4 w-4" />
+          </Button>
         </div>
 
         <div className="flex items-center space-x-2">
           <Button
-            variant={viewMode ===  'day' ? 'default' : 'outline'}
+            variant={viewMode === 'day' ? 'default' : 'outline'}
             size="sm"
             onClick={() => setViewMode('day')}
           >
@@ -313,13 +258,6 @@ export const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
             onClick={() => setViewMode('week')}
           >
             Week
-          </Button>
-          <Button
-            variant={viewMode === 'table' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setViewMode('table')}
-          >
-            Table
           </Button>
           <Button
             variant={viewMode === 'month' ? 'default' : 'outline'}
@@ -348,10 +286,9 @@ export const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
       </div>
 
       {/* Calendar Content */}
-      {viewMode === 'table' && renderTableView()}
-      {viewMode === 'month' && renderMonthView()}
       {viewMode === 'day' && renderDayView()}
       {viewMode === 'week' && renderWeekView()}
+      {viewMode === 'month' && renderMonthView()}
 
       {/* Special Event Form */}
       <SpecialEventForm
