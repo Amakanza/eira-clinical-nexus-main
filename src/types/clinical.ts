@@ -1,4 +1,3 @@
-
 export interface MainMember {
   medicalAidName: string;
   medicalAidNumber: string;
@@ -97,17 +96,51 @@ export interface User {
   createdAt: string;
 }
 
+export interface TimeSlot {
+  id: string;
+  startTime: string; // HH:MM format
+  endTime: string;
+  isEarlyMorning: boolean;
+}
+
+export interface Room {
+  id: string;
+  name: string;
+  capacity: number;
+  isGym: boolean;
+}
+
+export interface SpecialEvent {
+  id: string;
+  title: string;
+  startDateTime: string;
+  endDateTime: string;
+  clinicianIds: string[];
+  type: 'meeting' | 'leave' | 'training' | 'other';
+  description?: string;
+}
+
 export interface Appointment {
   id: string;
   patientId: string;
+  patientName: string;
   clinicianId: string;
-  date: string;
-  time: string;
+  clinicianName: string;
+  date: string; // YYYY-MM-DD
+  timeSlot?: TimeSlot; // For regular slots
+  customStartTime?: string; // For early morning (07:30-09:00)
+  customEndTime?: string; // For early morning
   duration: number; // in minutes
-  type: 'consultation' | 'follow-up' | 'procedure' | 'emergency';
+  type: 'consultation' | 'follow-up' | 'procedure' | 'emergency' | 'early-morning';
   status: 'scheduled' | 'in-progress' | 'completed' | 'cancelled' | 'no-show';
+  roomId: string;
+  roomName: string;
   notes?: string;
-  location?: string;
+  additionalInfo?: string;
+  createdBy: string;
+  updatedBy: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 // ICD-10 code interface

@@ -1,32 +1,61 @@
 
+import React, { useState } from 'react';
 import { MainLayout } from '@/components/layout/MainLayout';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Calendar, Plus } from 'lucide-react';
+import { AppointmentCalendar } from '@/components/appointments/AppointmentCalendar';
+import { AppointmentForm } from '@/components/appointments/AppointmentForm';
+import { Appointment } from '@/types/clinical';
 
 const Appointments = () => {
+  const [selectedAppointment, setSelectedAppointment] = useState<Appointment | undefined>();
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [preselectedDate, setPreselectedDate] = useState<string>();
+  const [preselectedTimeSlot, setPreselectedTimeSlot] = useState<string>();
+
+  const handleAppointmentClick = (appointment: Appointment) => {
+    setSelectedAppointment(appointment);
+    setIsFormOpen(true);
+  };
+
+  const handleNewAppointment = (date?: string, timeSlotId?: string) => {
+    setSelectedAppointment(undefined);
+    setPreselectedDate(date);
+    setPreselectedTimeSlot(timeSlotId);
+    setIsFormOpen(true);
+  };
+
+  const handleFormClose = () => {
+    setIsFormOpen(false);
+    setSelectedAppointment(undefined);
+    setPreselectedDate(undefined);
+    setPreselectedTimeSlot(undefined);
+  };
+
+  const handleAppointmentSave = (appointment: Appointment) => {
+    // The hook handles the state update, we just need to close the form
+    console.log('Appointment saved:', appointment);
+  };
+
   return (
     <MainLayout currentPath="/appointments">
       <div className="space-y-6">
-        <div className="flex justify-between items-center">
+        <div>
           <h1 className="text-3xl font-bold text-gray-900">Appointments</h1>
-          <Button className="flex items-center space-x-2">
-            <Plus className="h-4 w-4" />
-            <span>Schedule Appointment</span>
-          </Button>
+          <p className="text-gray-600 mt-2">
+            Manage patient appointments with 40-minute time slots and room capacity tracking
+          </p>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <Calendar className="h-5 w-5" />
-              <span>Appointment Schedule</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-gray-600">Appointment scheduling functionality will be implemented here.</p>
-          </CardContent>
-        </Card>
+        <AppointmentCalendar
+          onAppointmentClick={handleAppointmentClick}
+          onNewAppointment={handleNewAppointment}
+        />
+
+        <AppointmentForm
+          isOpen={isFormOpen}
+          onClose={handleFormClose}
+          appointment={selectedAppointment}
+          onSave={handleAppointmentSave}
+        />
       </div>
     </MainLayout>
   );
