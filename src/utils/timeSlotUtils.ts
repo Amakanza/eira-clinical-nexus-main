@@ -1,4 +1,3 @@
-
 import { TimeSlot, Room, Appointment, SpecialEvent } from '@/types/clinical';
 
 // Generate all regular time slots from 09:20 to 16:00
@@ -13,7 +12,7 @@ export const generateTimeSlots = (): TimeSlot[] => {
   let currentMinute = startMinute;
   let slotIndex = 0;
   
-  while (currentHour < endHour || (currentHour === endHour && currentMinute === endMinute)) {
+  while (currentHour < endHour || (currentHour === endHour && currentMinute < endMinute)) {
     const startTime = `${currentHour.toString().padStart(2, '0')}:${currentMinute.toString().padStart(2, '0')}`;
     
     // Calculate end time (40 minutes later)
@@ -42,11 +41,6 @@ export const generateTimeSlots = (): TimeSlot[] => {
     }
     
     slotIndex++;
-    
-    // Break if we've reached the end
-    if (currentHour === endHour && currentMinute === endMinute) {
-      break;
-    }
   }
   
   return slots;
