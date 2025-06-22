@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Appointment, TimeSlot, Room, SpecialEvent, User } from '@/types/clinical';
 import { generateTimeSlots, isClinicianAvailable, hasRoomCapacity } from '@/utils/timeSlotUtils';
@@ -7,8 +6,9 @@ import { generateTimeSlots, isClinicianAvailable, hasRoomCapacity } from '@/util
 const mockRooms: Room[] = [
   { id: 'room-1', name: 'Treatment Room 1', capacity: 4, isGym: false },
   { id: 'room-2', name: 'Treatment Room 2', capacity: 4, isGym: false },
-  { id: 'room-3', name: 'Gym', capacity: 10, isGym: true },
-  { id: 'room-4', name: 'Consultation Room', capacity: 4, isGym: false },
+  { id: 'room-3', name: 'Treatment Room 3', capacity: 4, isGym: false },
+  { id: 'room-4', name: 'Treatment Room 4', capacity: 4, isGym: false },
+  { id: 'room-gym', name: 'Gym', capacity: 10, isGym: true },
 ];
 
 const mockClinicians: User[] = [
@@ -175,6 +175,68 @@ export const useAppointments = () => {
     );
   };
 
+  const createSpecialEvent = async (eventData: Partial<SpecialEvent>): Promise<SpecialEvent> => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const newEvent: SpecialEvent = {
+        id: `event-${Date.now()}`,
+        title: eventData.title || '',
+        startDateTime: eventData.startDateTime || '',
+        endDateTime: eventData.endDateTime || '',
+        clinicianIds: eventData.clinicianIds || [],
+        type: eventData.type || 'other',
+        description: eventData.description
+      };
+      
+      setSpecialEvents(prev => [...prev, newEvent]);
+      return newEvent;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to create special event';
+      setError(errorMessage);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateSpecialEvent = async (id: string, updates: Partial<SpecialEvent>): Promise<SpecialEvent> => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      setSpecialEvents(prev => prev.map(event => 
+        event.id === id 
+          ? { ...event, ...updates }
+          : event
+      ));
+      
+      return specialEvents.find(event => event.id === id)!;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to update special event';
+      setError(errorMessage);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const deleteSpecialEvent = async (id: string): Promise<void> => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      setSpecialEvents(prev => prev.filter(event => event.id !== id));
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to delete special event';
+      setError(errorMessage);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return {
     appointments,
     specialEvents,
@@ -187,7 +249,10 @@ export const useAppointments = () => {
     updateAppointment,
     deleteAppointment,
     getAppointmentsByDate,
-    getAppointmentsByClinician
+    getAppointmentsByClinician,
+    createSpecialEvent,
+    updateSpecialEvent,
+    deleteSpecialEvent
   };
 };
 

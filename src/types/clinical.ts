@@ -124,8 +124,8 @@ export interface Appointment {
   id: string;
   patientId: string;
   patientName: string;
-  clinicianId: string;
-  clinicianName: string;
+  clinicianId?: string; // Optional for early morning
+  clinicianName?: string; // Optional for early morning
   date: string; // YYYY-MM-DD
   timeSlot?: TimeSlot; // For regular slots
   customStartTime?: string; // For early morning (07:30-09:00)

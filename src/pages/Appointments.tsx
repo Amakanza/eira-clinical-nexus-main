@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { AppointmentCalendar } from '@/components/appointments/AppointmentCalendar';
@@ -10,16 +9,18 @@ const Appointments = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [preselectedDate, setPreselectedDate] = useState<string>();
   const [preselectedTimeSlot, setPreselectedTimeSlot] = useState<string>();
+  const [preselectedClinicianId, setPreselectedClinicianId] = useState<string>();
 
   const handleAppointmentClick = (appointment: Appointment) => {
     setSelectedAppointment(appointment);
     setIsFormOpen(true);
   };
 
-  const handleNewAppointment = (date?: string, timeSlotId?: string) => {
+  const handleNewAppointment = (date?: string, timeSlotId?: string, clinicianId?: string) => {
     setSelectedAppointment(undefined);
     setPreselectedDate(date);
     setPreselectedTimeSlot(timeSlotId);
+    setPreselectedClinicianId(clinicianId);
     setIsFormOpen(true);
   };
 
@@ -28,6 +29,7 @@ const Appointments = () => {
     setSelectedAppointment(undefined);
     setPreselectedDate(undefined);
     setPreselectedTimeSlot(undefined);
+    setPreselectedClinicianId(undefined);
   };
 
   const handleAppointmentSave = (appointment: Appointment) => {
@@ -55,6 +57,9 @@ const Appointments = () => {
           onClose={handleFormClose}
           appointment={selectedAppointment}
           onSave={handleAppointmentSave}
+          preselectedDate={preselectedDate}
+          preselectedTimeSlot={preselectedTimeSlot}
+          preselectedClinicianId={preselectedClinicianId}
         />
       </div>
     </MainLayout>

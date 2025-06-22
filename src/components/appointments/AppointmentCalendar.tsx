@@ -1,25 +1,29 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { format, addDays, subDays, startOfWeek, addWeeks, subWeeks } from 'date-fns';
-import { ChevronLeft, ChevronRight, Plus, Clock, User, MapPin } from 'lucide-react';
-import { Appointment } from '@/types/clinical';
+import { format, addDays, subDays, startOfWeek, addWeeks, subWeeks, addMonths, subMonths } from 'date-fns';
+import { ChevronLeft, ChevronRight, Plus, Clock, User, MapPin, Calendar } from 'lucide-react';
+import { Appointment, SpecialEvent } from '@/types/clinical';
 import { useAppointments } from '@/hooks/useAppointments';
+import { AppointmentTableView } from './AppointmentTableView';
+import { MonthlyView } from './MonthlyView';
+import { SpecialEventForm } from './SpecialEventForm';
 
 interface AppointmentCalendarProps {
   onAppointmentClick: (appointment: Appointment) => void;
-  onNewAppointment: (date?: string, timeSlot?: string) => void;
+  onNewAppointment: (date?: string, timeSlot?: string, clinicianId?: string) => void;
 }
 
 export const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
   onAppointmentClick,
   onNewAppointment
 }) => {
-  const { appointments, timeSlots } = useAppointments();
+  const { appointments, timeSlots, specialEvents } = useAppointments();
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [viewMode, setViewMode] = useState<'day' | 'week'>('day');
+  const [viewMode, setViewMode] = useState<'day' | 'week' | 'table' | 'month'>('table');
+  const [isSpecialEventFormOpen, setIsSpecialEventFormOpen] = useState(false);
+  const [selectedSpecialEvent, setSelectedSpecialEvent] = useState<SpecialEvent | undefined>();
 
   const formatDateForComparison = (date: Date): string => {
     return format(date, 'yyyy-MM-dd');
@@ -27,6 +31,26 @@ export const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
 
   const getAppointmentsForDate = (date: string): Appointment[] => {
     return appointments.filter(apt => apt.date === date && apt.status !== 'cancelled');
+  };
+
+  const navigateDate = (direction: 'prev' | 'next') => {
+    if (viewMode === 'day') {
+      setCurrentDate(prev => direction === 'next' ? addDays(prev, 1) : subDays(prev, 1));
+    } else if (viewMode === 'week' || viewMode === 'table') {
+      setCurrentDate(prev => direction === 'next' ? addWeeks(prev, 1) : subWeeks(prev, 1));
+    } else if (viewMode === 'month') {
+      setCurrentDate(prev => direction === 'next' ? addMonths(prev, 1) : subMonths(prev, 1));
+    }
+  };
+
+  const handleSpecialEventSave = (event: SpecialEvent) => {
+    console.log('Special event saved:', event);
+    setSelectedSpecialEvent(undefined);
+  };
+
+  const handleDateClick = (date: Date) => {
+    setCurrentDate(date);
+    setViewMode('table');
   };
 
   const getAppointmentsForTimeSlot = (date: string, timeSlotId: string): Appointment[] => {
@@ -43,14 +67,6 @@ export const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
       apt.type === 'early-morning' && 
       apt.status !== 'cancelled'
     );
-  };
-
-  const navigateDate = (direction: 'prev' | 'next') => {
-    if (viewMode === 'day') {
-      setCurrentDate(prev => direction === 'next' ? addDays(prev, 1) : subDays(prev, 1));
-    } else {
-      setCurrentDate(prev => direction === 'next' ? addWeeks(prev, 1) : subWeeks(prev, 1));
-    }
   };
 
   const renderDayView = () => {
@@ -227,6 +243,43 @@ export const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
     );
   };
 
+  const renderTableView = () => {
+    const dateStr = formatDateForComparison(currentDate);
+    return (
+      <AppointmentTableView
+        date={dateStr}
+        onAppointmentClick={onAppointmentClick}
+        onNewAppointment={(date, timeSlot, clinicianId) => 
+          onNewAppointment(date, timeSlot, clinicianId)
+        }
+      />
+    );
+  };
+
+  const renderMonthView = () => {
+    return (
+      <MonthlyView
+        currentDate={currentDate}
+        onDateClick={handleDateClick}
+        onAppointmentClick={onAppointmentClick}
+      />
+    );
+  };
+
+  const getViewTitle = () => {
+    switch (viewMode) {
+      case 'day':
+        return format(currentDate, 'EEEE, MMMM d, yyyy');
+      case 'week':
+      case 'table':
+        return `Week of ${format(startOfWeek(currentDate, { weekStartsOn: 1 }), 'MMM d, yyyy')}`;
+      case 'month':
+        return format(currentDate, 'MMMM yyyy');
+      default:
+        return '';
+    }
+  };
+
   return (
     <div className="space-y-4">
       {/* Navigation Header */}
@@ -242,16 +295,13 @@ export const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
           </div>
           
           <h2 className="text-xl font-semibold">
-            {viewMode === 'day' 
-              ? format(currentDate, 'EEEE, MMMM d, yyyy')
-              : `Week of ${format(startOfWeek(currentDate, { weekStartsOn: 1 }), 'MMM d, yyyy')}`
-            }
+            {getViewTitle()}
           </h2>
         </div>
 
         <div className="flex items-center space-x-2">
           <Button
-            variant={viewMode === 'day' ? 'default' : 'outline'}
+            variant={viewMode ===  'day' ? 'default' : 'outline'}
             size="sm"
             onClick={() => setViewMode('day')}
           >
@@ -264,6 +314,31 @@ export const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
           >
             Week
           </Button>
+          <Button
+            variant={viewMode === 'table' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setViewMode('table')}
+          >
+            Table
+          </Button>
+          <Button
+            variant={viewMode === 'month' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setViewMode('month')}
+          >
+            Month
+          </Button>
+          
+          <div className="h-4 w-px bg-gray-300" />
+          
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setIsSpecialEventFormOpen(true)}
+          >
+            <Calendar className="h-4 w-4 mr-1" />
+            Special Event
+          </Button>
           
           <Button onClick={() => onNewAppointment()}>
             <Plus className="h-4 w-4 mr-2" />
@@ -273,7 +348,21 @@ export const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
       </div>
 
       {/* Calendar Content */}
-      {viewMode === 'day' ? renderDayView() : renderWeekView()}
+      {viewMode === 'table' && renderTableView()}
+      {viewMode === 'month' && renderMonthView()}
+      {viewMode === 'day' && renderDayView()}
+      {viewMode === 'week' && renderWeekView()}
+
+      {/* Special Event Form */}
+      <SpecialEventForm
+        isOpen={isSpecialEventFormOpen}
+        onClose={() => {
+          setIsSpecialEventFormOpen(false);
+          setSelectedSpecialEvent(undefined);
+        }}
+        event={selectedSpecialEvent}
+        onSave={handleSpecialEventSave}
+      />
     </div>
   );
 };
