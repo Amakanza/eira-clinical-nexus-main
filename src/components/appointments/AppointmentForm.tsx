@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -21,13 +20,19 @@ interface AppointmentFormProps {
   onClose: () => void;
   appointment?: Appointment;
   onSave: (appointment: Appointment) => void;
+  preselectedDate?: string;
+  preselectedTimeSlot?: string;
+  preselectedClinicianId?: string;
 }
 
 export const AppointmentForm: React.FC<AppointmentFormProps> = ({
   isOpen,
   onClose,
   appointment,
-  onSave
+  onSave,
+  preselectedDate,
+  preselectedTimeSlot,
+  preselectedClinicianId
 }) => {
   const { timeSlots, rooms, clinicians, createAppointment, updateAppointment } = useAppointments();
   
@@ -50,7 +55,7 @@ export const AppointmentForm: React.FC<AppointmentFormProps> = ({
     if (appointment) {
       setFormData({
         patientName: appointment.patientName,
-        clinicianId: appointment.clinicianId,
+        clinicianId: appointment.clinicianId || '',
         date: new Date(appointment.date),
         timeSlotId: appointment.timeSlot?.id || '',
         customStartTime: appointment.customStartTime || '',
@@ -62,12 +67,12 @@ export const AppointmentForm: React.FC<AppointmentFormProps> = ({
       });
       setIsEarlyMorning(appointment.type === 'early-morning');
     } else {
-      // Reset form for new appointment
+      // Reset form for new appointment with preselected values
       setFormData({
         patientName: '',
-        clinicianId: '',
-        date: new Date(),
-        timeSlotId: '',
+        clinicianId: preselectedClinicianId || '',
+        date: preselectedDate ? new Date(preselectedDate) : new Date(),
+        timeSlotId: preselectedTimeSlot || '',
         customStartTime: '',
         customEndTime: '',
         type: 'consultation',
@@ -77,7 +82,7 @@ export const AppointmentForm: React.FC<AppointmentFormProps> = ({
       });
       setIsEarlyMorning(false);
     }
-  }, [appointment, isOpen]);
+  }, [appointment, isOpen, preselectedDate, preselectedTimeSlot, preselectedClinicianId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -175,10 +180,10 @@ export const AppointmentForm: React.FC<AppointmentFormProps> = ({
             </div>
             
             <div>
-              <Label htmlFor="clinician">Clinician *</Label>
+              <Label htmlFor="clinician">Clinician</Label>
               <Select value={formData.clinicianId} onValueChange={(value) => setFormData(prev => ({ ...prev, clinicianId: value }))}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select clinician" />
+                  <SelectValue placeholder="Select clinician (optional for early morning)" />
                 </SelectTrigger>
                 <SelectContent>
                   {clinicians.map((clinician) => (
