@@ -53,10 +53,10 @@ export const useGenerateReport = () => {
     mutationFn: async ({ type, id }: { type: 'general' | 'mva'; id: string }) => {
       console.log(`Generating ${type} report for ${id}`);
       
-      const response = await fetch(`${supabase.supabaseUrl}/functions/v1/reports/${type}/${id}`, {
+      const response = await fetch(`https://anmxvcoleucxybtowpnm.supabase.co/functions/v1/reports/${type}/${id}`, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${supabase.supabaseKey}`,
+          'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFubXh2Y29sZXVjeHlidG93cG5tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3MTA3NzIsImV4cCI6MjA2NjI4Njc3Mn0.82tFr2l-RrpADwaYRhDLKEWxDNhkaBGZD4d_Hq5QA4M`,
           'Content-Type': 'application/json',
         },
       });
