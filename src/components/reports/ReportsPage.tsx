@@ -83,7 +83,9 @@ const ReportsPage = () => {
                 </SelectTrigger>
                 <SelectContent>
                   {patientsLoading ? (
-                    <SelectItem value="" disabled>Loading patients...</SelectItem>
+                    <SelectItem value="loading" disabled>Loading patients...</SelectItem>
+                  ) : patients.length === 0 ? (
+                    <SelectItem value="no-patients" disabled>No patients available</SelectItem>
                   ) : (
                     patients.map((patient) => (
                       <SelectItem key={patient.id} value={patient.id}>
@@ -117,7 +119,7 @@ const ReportsPage = () => {
 
             <Button 
               onClick={handleGenerateReport}
-              disabled={!selectedPatient || generateReport.isPending}
+              disabled={!selectedPatient || selectedPatient === 'loading' || selectedPatient === 'no-patients' || generateReport.isPending}
               className="w-full"
             >
               {generateReport.isPending ? (
