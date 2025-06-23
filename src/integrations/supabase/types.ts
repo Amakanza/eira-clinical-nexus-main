@@ -9,7 +9,254 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      activities_daily_living: {
+        Row: {
+          activity: string
+          assessment_date: string | null
+          comment: string | null
+          created_at: string | null
+          current_level: string | null
+          id: string
+          initial_level: string | null
+          patient_id: string
+          reassessment_1_level: string | null
+          reassessment_2_level: string | null
+          reassessment_3_level: string | null
+        }
+        Insert: {
+          activity: string
+          assessment_date?: string | null
+          comment?: string | null
+          created_at?: string | null
+          current_level?: string | null
+          id?: string
+          initial_level?: string | null
+          patient_id: string
+          reassessment_1_level?: string | null
+          reassessment_2_level?: string | null
+          reassessment_3_level?: string | null
+        }
+        Update: {
+          activity?: string
+          assessment_date?: string | null
+          comment?: string | null
+          created_at?: string | null
+          current_level?: string | null
+          id?: string
+          initial_level?: string | null
+          patient_id?: string
+          reassessment_1_level?: string | null
+          reassessment_2_level?: string | null
+          reassessment_3_level?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activities_daily_living_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      clinical_notes: {
+        Row: {
+          content: string
+          created_at: string | null
+          created_by: string | null
+          id: string
+          note_date: string
+          note_type: string
+          patient_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          note_date?: string
+          note_type: string
+          patient_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          note_date?: string
+          note_type?: string
+          patient_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clinical_notes_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      joint_measurements: {
+        Row: {
+          comment: string | null
+          created_at: string | null
+          current_rom: string | null
+          id: string
+          initial_rom: string | null
+          joint: string
+          measurement_date: string | null
+          patient_id: string
+          reassessment_1_rom: string | null
+          reassessment_2_rom: string | null
+          reassessment_3_rom: string | null
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string | null
+          current_rom?: string | null
+          id?: string
+          initial_rom?: string | null
+          joint: string
+          measurement_date?: string | null
+          patient_id: string
+          reassessment_1_rom?: string | null
+          reassessment_2_rom?: string | null
+          reassessment_3_rom?: string | null
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string | null
+          current_rom?: string | null
+          id?: string
+          initial_rom?: string | null
+          joint?: string
+          measurement_date?: string | null
+          patient_id?: string
+          reassessment_1_rom?: string | null
+          reassessment_2_rom?: string | null
+          reassessment_3_rom?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "joint_measurements_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      muscle_strength: {
+        Row: {
+          comment: string | null
+          created_at: string | null
+          current_strength: string | null
+          id: string
+          initial_strength: string | null
+          measurement_date: string | null
+          muscle_group: string
+          patient_id: string
+          reassessment_1_strength: string | null
+          reassessment_2_strength: string | null
+          reassessment_3_strength: string | null
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string | null
+          current_strength?: string | null
+          id?: string
+          initial_strength?: string | null
+          measurement_date?: string | null
+          muscle_group: string
+          patient_id: string
+          reassessment_1_strength?: string | null
+          reassessment_2_strength?: string | null
+          reassessment_3_strength?: string | null
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string | null
+          current_strength?: string | null
+          id?: string
+          initial_strength?: string | null
+          measurement_date?: string | null
+          muscle_group?: string
+          patient_id?: string
+          reassessment_1_strength?: string | null
+          reassessment_2_strength?: string | null
+          reassessment_3_strength?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "muscle_strength_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      patients: {
+        Row: {
+          case_manager: string | null
+          case_number: string | null
+          created_at: string | null
+          date_of_birth: string | null
+          date_of_initial_ax: string | null
+          diagnosis: string | null
+          facility: string | null
+          home_address: string | null
+          id: string
+          medical_aid: string | null
+          medical_aid_number: string | null
+          occupation: string | null
+          patient_name: string
+          physiotherapist: string | null
+          referring_dr: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          case_manager?: string | null
+          case_number?: string | null
+          created_at?: string | null
+          date_of_birth?: string | null
+          date_of_initial_ax?: string | null
+          diagnosis?: string | null
+          facility?: string | null
+          home_address?: string | null
+          id?: string
+          medical_aid?: string | null
+          medical_aid_number?: string | null
+          occupation?: string | null
+          patient_name: string
+          physiotherapist?: string | null
+          referring_dr?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          case_manager?: string | null
+          case_number?: string | null
+          created_at?: string | null
+          date_of_birth?: string | null
+          date_of_initial_ax?: string | null
+          diagnosis?: string | null
+          facility?: string | null
+          home_address?: string | null
+          id?: string
+          medical_aid?: string | null
+          medical_aid_number?: string | null
+          occupation?: string | null
+          patient_name?: string
+          physiotherapist?: string | null
+          referring_dr?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
