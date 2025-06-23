@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
@@ -127,20 +126,28 @@ serve(async (req) => {
       .select('*')
       .eq('patient_id', patientData.id)
 
-    // Generate report based on type
-    let reportData: any
+    // Generate narrative text based on type
+    let narrativeText: string
 
     if (reportType === 'general') {
-      reportData = generateGeneralReport(patientData, clinicalNotes || [])
+      narrativeText = generateGeneralReportNarrative(patientData, clinicalNotes || [])
     } else {
-      reportData = generateMVAReport(patientData, clinicalNotes || [], jointMeasurements || [], muscleStrength || [], activities || [])
+      narrativeText = generateMVAReportNarrative(patientData, clinicalNotes || [], jointMeasurements || [], muscleStrength || [], activities || [])
     }
 
-    // Apply grammar checking (simplified - in production you'd integrate with LanguageTool)
-    const correctedReport = await applyGrammarCorrections(reportData)
+    // Apply LanguageTool grammar checking
+    const correctedText = await checkGrammarWithLanguageTool(narrativeText)
+
+    // Return the corrected narrative text
+    const reportData = {
+      narrativeText: correctedText,
+      originalData: reportType === 'general' 
+        ? generateGeneralReportData(patientData, clinicalNotes || [])
+        : generateMVAReportData(patientData, clinicalNotes || [], jointMeasurements || [], muscleStrength || [], activities || [])
+    }
 
     return new Response(
-      JSON.stringify(correctedReport),
+      JSON.stringify(reportData),
       { 
         status: 200, 
         headers: { 
@@ -159,7 +166,121 @@ serve(async (req) => {
   }
 })
 
-function generateGeneralReport(patient: PatientData, notes: ClinicalNote[]) {
+function generateGeneralReportNarrative(patient: PatientData, notes: ClinicalNote[]): string {
+  const assessmentNotes = notes.filter(n => n.note_type === 'assessment').map(n => n.content).join(' ')
+  const treatmentNotes = notes.filter(n => n.note_type === 'treatment_plan').map(n => n.content).join(' ')
+  const reassessmentNotes = notes.filter(n => n.note_type === 'reassessment').map(n => n.content).join(' ')
+  const recommendationNotes = notes.filter(n => n.note_type === 'recommendations').map(n => n.content).join(' ')
+
+  return `
+PHYSIOTHERAPY REPORT
+
+Patient: ${patient.patient_name || 'Not specified'}
+Date of Birth: ${patient.date_of_birth || 'Not specified'}
+Medical Aid: ${patient.medical_aid || 'Not specified'} (${patient.medical_aid_number || 'Not specified'})
+Occupation: ${patient.occupation || 'Not specified'}
+Physiotherapist: ${patient.physiotherapist || 'Not specified'}
+Referral Diagnosis: ${patient.diagnosis || 'Not specified'}
+Report Date: ${new Date().toLocaleDateString()}
+
+ASSESSMENT:
+${assessmentNotes || 'No assessment notes available.'}
+
+TREATMENT PLAN:
+${treatmentNotes || 'No treatment plan notes available.'}
+
+REASSESSMENT:
+${reassessmentNotes || 'No reassessment notes available.'}
+
+RECOMMENDATIONS:
+${recommendationNotes || 'No recommendations available.'}
+
+Kind regards,
+
+${patient.physiotherapist || 'Physiotherapist'}
+BSc Physiotherapy
+  `.trim()
+}
+
+function generateMVAReportNarrative(
+  patient: PatientData, 
+  notes: ClinicalNote[], 
+  joints: JointMeasurement[], 
+  muscles: MuscleStrength[], 
+  activities: ActivityDailyLiving[]
+): string {
+  const historyNotes = notes.filter(n => n.note_type === 'history').map(n => n.content).join(' ')
+  const findingsNotes = notes.filter(n => n.note_type === 'findings').map(n => n.content).join(' ')
+  const assessmentNotes = notes.filter(n => n.note_type === 'assessment').map(n => n.content).join(' ')
+  const recommendationNotes = notes.filter(n => n.note_type === 'recommendations').map(n => n.content).join(' ')
+
+  let jointText = ''
+  if (joints.length > 0) {
+    jointText = 'Joint Range of Motion findings include: ' + joints.map(j => 
+      `${j.joint} with initial ROM of ${j.initial_rom || 'not recorded'}${j.comment ? ` (${j.comment})` : ''}`
+    ).join(', ') + '.'
+  }
+
+  let muscleText = ''
+  if (muscles.length > 0) {
+    muscleText = 'Muscle strength assessment shows: ' + muscles.map(m => 
+      `${m.muscle_group} with initial strength of ${m.initial_strength || 'not recorded'}${m.comment ? ` (${m.comment})` : ''}`
+    ).join(', ') + '.'
+  }
+
+  let activitiesText = ''
+  if (activities.length > 0) {
+    activitiesText = 'Activities of Daily Living assessment reveals: ' + activities.map(a => 
+      `${a.activity} with initial level of ${a.initial_level || 'not recorded'}${a.comment ? ` (${a.comment})` : ''}`
+    ).join(', ') + '.'
+  }
+
+  return `
+MVA INITIAL PHYSIOTHERAPY REPORT
+
+Patient Name: ${patient.patient_name || 'Not specified'}
+Case Number: ${patient.case_number || 'Not specified'}
+Occupation: ${patient.occupation || 'Not specified'}
+Date of Birth: ${patient.date_of_birth || 'Not specified'}
+Referring Doctor: ${patient.referring_dr || 'Not specified'}
+Date of Initial Assessment: ${patient.date_of_initial_ax || 'Not specified'}
+Case Manager: ${patient.case_manager || 'Not specified'}
+Report Date: ${new Date().toLocaleDateString()}
+Facility: ${patient.facility || 'Not specified'}
+Physiotherapist: ${patient.physiotherapist || 'Not specified'}
+Diagnosis: ${patient.diagnosis || 'Not specified'}
+
+HISTORY:
+${historyNotes || assessmentNotes || 'No history notes available.'}
+
+HOME ADDRESS:
+${patient.home_address || 'Not specified'}
+
+INVESTIGATIONS AND SPECIAL TESTS:
+${findingsNotes || 'No special tests or investigations documented.'}
+
+PHYSICAL ASSESSMENT:
+${jointText}
+
+${muscleText}
+
+${activitiesText}
+
+OTHER FINDINGS:
+${findingsNotes || 'No additional findings documented.'}
+
+PHYSIOTHERAPY KEY GOALS:
+Improve functional mobility and reduce pain associated with motor vehicle accident injuries.
+
+RECOMMENDATIONS:
+${recommendationNotes || 'Continue physiotherapy treatment as clinically indicated.'}
+
+${patient.physiotherapist || 'Physiotherapist'}
+BSc Physiotherapy
+  `.trim()
+}
+
+function generateGeneralReportData(patient: PatientData, notes: ClinicalNote[]) {
   const assessmentNotes = notes.filter(n => n.note_type === 'assessment').map(n => n.content).join(' ')
   const treatmentNotes = notes.filter(n => n.note_type === 'treatment_plan').map(n => n.content).join(' ')
   const reassessmentNotes = notes.filter(n => n.note_type === 'reassessment').map(n => n.content).join(' ')
@@ -188,7 +309,7 @@ function generateGeneralReport(patient: PatientData, notes: ClinicalNote[]) {
   }
 }
 
-function generateMVAReport(
+function generateMVAReportData(
   patient: PatientData, 
   notes: ClinicalNote[], 
   joints: JointMeasurement[], 
@@ -242,13 +363,47 @@ function generateMVAReport(
   }
 }
 
-async function applyGrammarCorrections(reportData: any): Promise<any> {
-  // Simplified grammar correction - in production, integrate with LanguageTool API
-  // For now, just return the data as-is
-  console.log('Applying grammar corrections...')
-  
-  // You would implement LanguageTool integration here:
-  // const correctedText = await checkGrammar(JSON.stringify(reportData))
-  
-  return reportData
+async function checkGrammarWithLanguageTool(text: string): Promise<string> {
+  try {
+    // LanguageTool API integration
+    const response = await fetch('https://api.languagetool.org/v2/check', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+        'text': text,
+        'language': 'en-US',
+        'enabledOnly': 'false'
+      }),
+    });
+
+    if (!response.ok) {
+      console.error('LanguageTool API error:', response.status);
+      return text; // Return original text if API fails
+    }
+
+    const result = await response.json();
+    let correctedText = text;
+
+    // Apply corrections in reverse order to maintain string positions
+    if (result.matches && result.matches.length > 0) {
+      const matches = result.matches.sort((a: any, b: any) => b.offset - a.offset);
+      
+      for (const match of matches) {
+        if (match.replacements && match.replacements.length > 0) {
+          const replacement = match.replacements[0].value;
+          const start = match.offset;
+          const end = start + match.length;
+          correctedText = correctedText.substring(0, start) + replacement + correctedText.substring(end);
+        }
+      }
+    }
+
+    console.log('Grammar check completed. Found', result.matches?.length || 0, 'suggestions');
+    return correctedText;
+  } catch (error) {
+    console.error('Error checking grammar with LanguageTool:', error);
+    return text; // Return original text if grammar check fails
+  }
 }

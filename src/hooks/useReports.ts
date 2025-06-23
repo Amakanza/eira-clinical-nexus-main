@@ -21,14 +21,8 @@ export interface Patient {
 }
 
 export interface ReportData {
-  patient_info?: any;
-  report_header?: any;
-  assessment?: string;
-  treatment_plan?: string;
-  reassessment?: string;
-  recommendations?: string;
-  sign_off?: any;
-  [key: string]: any;
+  narrativeText: string;
+  originalData: any;
 }
 
 export const usePatients = () => {
@@ -90,15 +84,47 @@ export const useDownloadReport = () => {
       type: 'general' | 'mva'; 
       patientName: string 
     }) => {
-      // Create a downloadable JSON file for now
-      // In production, this would generate a Word document
-      const dataStr = JSON.stringify(reportData, null, 2);
-      const dataBlob = new Blob([dataStr], { type: 'application/json' });
+      // Create a Word document using the narrative text
+      const { Document, Packer, Paragraph, TextRun } = await import('docx');
       
-      const url = URL.createObjectURL(dataBlob);
+      // Parse the narrative text into paragraphs
+      const paragraphs = reportData.narrativeText.split('\n\n').map(paragraph => {
+        const trimmed = paragraph.trim();
+        if (!trimmed) return null;
+        
+        // Check if this is a heading (all caps or ends with colon)
+        const isHeading = trimmed === trimmed.toUpperCase() || trimmed.endsWith(':');
+        
+        return new Paragraph({
+          children: [
+            new TextRun({
+              text: trimmed,
+              bold: isHeading,
+              size: isHeading ? 24 : 22,
+            })
+          ],
+          spacing: {
+            after: 200,
+          }
+        });
+      }).filter(Boolean);
+
+      const doc = new Document({
+        sections: [{
+          properties: {},
+          children: paragraphs
+        }]
+      });
+
+      const buffer = await Packer.toBuffer(doc);
+      const blob = new Blob([buffer], { 
+        type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' 
+      });
+      
+      const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `${type}_report_${patientName.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.json`;
+      link.download = `${type}_report_${patientName.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.docx`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
