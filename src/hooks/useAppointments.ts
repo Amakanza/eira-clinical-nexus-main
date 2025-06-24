@@ -51,7 +51,7 @@ export const useAppointments = () => {
         patientName: 'John Smith',
         clinicianId: 'clinician-1',
         clinicianName: 'Dr. Sarah Thompson',
-        date: '2024-12-23',
+        date: '2025-06-24',
         timeSlot: {
           id: 'slot-0',
           startTime: '09:20',
@@ -112,7 +112,12 @@ export const useAppointments = () => {
         updatedAt: new Date().toISOString()
       };
       
-      setAppointments(prev => [...prev, newAppointment]);
+      console.log('Creating appointment:', newAppointment);
+      setAppointments(prev => {
+        const updated = [...prev, newAppointment];
+        console.log('Updated appointments list:', updated);
+        return updated;
+      });
       return newAppointment;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to create appointment';
@@ -133,13 +138,18 @@ export const useAppointments = () => {
         throw new Error(validation.error);
       }
       
-      setAppointments(prev => prev.map(apt => 
-        apt.id === id 
-          ? { ...apt, ...updates, updatedAt: new Date().toISOString() }
-          : apt
-      ));
+      setAppointments(prev => {
+        const updated = prev.map(apt => 
+          apt.id === id 
+            ? { ...apt, ...updates, updatedAt: new Date().toISOString() }
+            : apt
+        );
+        console.log('Updated appointments after edit:', updated);
+        return updated;
+      });
       
-      return appointments.find(apt => apt.id === id)!;
+      const updatedAppointment = appointments.find(apt => apt.id === id);
+      return { ...updatedAppointment!, ...updates, updatedAt: new Date().toISOString() };
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to update appointment';
       setError(errorMessage);

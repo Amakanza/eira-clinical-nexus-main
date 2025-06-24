@@ -22,21 +22,28 @@ export const AppointmentTableView: React.FC<AppointmentTableViewProps> = ({
 }) => {
   const { appointments, timeSlots, clinicians, updateAppointment } = useAppointments();
 
+  console.log('AppointmentTableView - All appointments:', appointments);
+  console.log('AppointmentTableView - Date filter:', date);
+
   const getAppointmentsForSlotAndClinician = (timeSlotId: string, clinicianId: string): Appointment[] => {
-    return appointments.filter(apt => 
+    const filtered = appointments.filter(apt => 
       apt.date === date && 
       apt.timeSlot?.id === timeSlotId && 
       apt.clinicianId === clinicianId &&
       apt.status !== 'cancelled'
     );
+    console.log(`Appointments for slot ${timeSlotId} and clinician ${clinicianId}:`, filtered);
+    return filtered;
   };
 
   const getEarlyMorningAppointments = (): Appointment[] => {
-    return appointments.filter(apt => 
+    const filtered = appointments.filter(apt => 
       apt.date === date && 
       apt.type === 'early-morning' && 
       apt.status !== 'cancelled'
     );
+    console.log('Early morning appointments:', filtered);
+    return filtered;
   };
 
   const getStatusColor = (status: string) => {
