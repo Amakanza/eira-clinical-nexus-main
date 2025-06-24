@@ -113,18 +113,21 @@ export const useAppointments = () => {
       };
       
       console.log('Creating appointment:', newAppointment);
-      setAppointments(prev => {
-        const updated = [...prev, newAppointment];
+      
+      // Use functional update to ensure we get the latest state
+      setAppointments(currentAppointments => {
+        const updated = [...currentAppointments, newAppointment];
         console.log('Updated appointments list:', updated);
         return updated;
       });
+      
+      setLoading(false);
       return newAppointment;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to create appointment';
       setError(errorMessage);
-      throw err;
-    } finally {
       setLoading(false);
+      throw err;
     }
   };
 
@@ -138,24 +141,27 @@ export const useAppointments = () => {
         throw new Error(validation.error);
       }
       
-      setAppointments(prev => {
-        const updated = prev.map(apt => 
-          apt.id === id 
-            ? { ...apt, ...updates, updatedAt: new Date().toISOString() }
-            : apt
-        );
+      let updatedAppointment: Appointment;
+      
+      setAppointments(currentAppointments => {
+        const updated = currentAppointments.map(apt => {
+          if (apt.id === id) {
+            updatedAppointment = { ...apt, ...updates, updatedAt: new Date().toISOString() };
+            return updatedAppointment;
+          }
+          return apt;
+        });
         console.log('Updated appointments after edit:', updated);
         return updated;
       });
       
-      const updatedAppointment = appointments.find(apt => apt.id === id);
-      return { ...updatedAppointment!, ...updates, updatedAt: new Date().toISOString() };
+      setLoading(false);
+      return updatedAppointment!;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to update appointment';
       setError(errorMessage);
-      throw err;
-    } finally {
       setLoading(false);
+      throw err;
     }
   };
 
