@@ -3,8 +3,39 @@ import { MainLayout } from '@/components/layout/MainLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Shield, User, Plus } from 'lucide-react';
+import { ClinicianBadge } from '@/components/ui/clinician-badge';
+import { useState } from 'react';
+import { RegisterForm } from '@/components/auth/RegisterForm';
 
 const AdminUsers = () => {
+  const [showRegisterForm, setShowRegisterForm] = useState(false);
+
+  // Mock user data with clinician colors
+  const mockUsers = [
+    {
+      id: '1',
+      firstName: 'Dr. Michael',
+      lastName: 'Wilson',
+      email: 'michael@clinic.com',
+      role: 'Administrator',
+      initials: 'MW',
+      clinicianColor: '#EF4444'
+    },
+    {
+      id: '2',
+      firstName: 'Sarah',
+      lastName: 'Thompson',
+      email: 'sarah@clinic.com',
+      role: 'Physiotherapist',
+      initials: 'ST',
+      clinicianColor: '#3B82F6'
+    }
+  ];
+
+  if (showRegisterForm) {
+    return <RegisterForm />;
+  }
+
   return (
     <MainLayout currentPath="/admin/users">
       <div className="space-y-6">
@@ -13,7 +44,10 @@ const AdminUsers = () => {
             <h1 className="text-3xl font-bold text-gray-900">User Management</h1>
             <p className="text-gray-600">Manage system users and permissions</p>
           </div>
-          <Button className="flex items-center space-x-2">
+          <Button 
+            className="flex items-center space-x-2"
+            onClick={() => setShowRegisterForm(true)}
+          >
             <Plus className="h-4 w-4" />
             <span>Add User</span>
           </Button>
@@ -29,29 +63,35 @@ const AdminUsers = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                  <div className="flex items-center space-x-4">
-                    <User className="h-8 w-8 text-blue-500" />
-                    <div>
-                      <p className="font-medium">Dr. Wilson</p>
-                      <p className="text-sm text-gray-500">Administrator</p>
+                {mockUsers.map((user) => (
+                  <div key={user.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div className="flex items-center space-x-4">
+                      <ClinicianBadge 
+                        clinician={user}
+                        size="md"
+                      />
+                      <div>
+                        <p className="font-medium">{user.firstName} {user.lastName}</p>
+                        <p className="text-sm text-gray-500">{user.role}</p>
+                        <p className="text-xs text-gray-400">{user.email}</p>
+                      </div>
                     </div>
+                    <Button variant="outline" size="sm">Edit</Button>
                   </div>
-                  <Button variant="outline" size="sm">Edit</Button>
-                </div>
-                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                  <div className="flex items-center space-x-4">
-                    <User className="h-8 w-8 text-green-500" />
-                    <div>
-                      <p className="font-medium">Sarah Thompson</p>
-                      <p className="text-sm text-gray-500">Physiotherapist</p>
-                    </div>
-                  </div>
-                  <Button variant="outline" size="sm">Edit</Button>
-                </div>
+                ))}
               </div>
             </CardContent>
           </Card>
+        </div>
+        
+        <div className="mt-8">
+          <Button 
+            variant="outline" 
+            onClick={() => setShowRegisterForm(false)}
+            className="w-full"
+          >
+            Back to User List
+          </Button>
         </div>
       </div>
     </MainLayout>

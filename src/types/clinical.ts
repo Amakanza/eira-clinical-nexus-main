@@ -84,6 +84,7 @@ export interface ClinicalNote {
 
 export interface User {
   id: string;
+  username?: string;
   email: string;
   firstName: string;
   lastName: string;
@@ -91,6 +92,8 @@ export interface User {
   department?: string;
   license?: string;
   signature?: string;
+  initials?: string; // Auto-generated from first and last name
+  clinicianColor?: string; // Unique color for clinicians
   isActive: boolean;
   lastLogin?: string;
   createdAt: string;
