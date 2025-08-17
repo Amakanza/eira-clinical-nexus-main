@@ -45,7 +45,7 @@ export const Header = ({ onMenuToggle }: HeaderProps) => {
         </Button>
         
         <div className="hidden sm:block">
-          <h1 className="text-xl font-semibold text-gray-900">Clinical Management System</h1>
+          <h1 className="text-xl font-semibold text-gray-900">Eira Notes</h1>
         </div>
       </div>
 

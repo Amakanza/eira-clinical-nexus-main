@@ -30,6 +30,7 @@ const navigation = [
   { name: 'Recent Activity', href: '/activity', icon: Clock, roles: ['admin', 'clinician', 'supervisor'] },
   { name: 'Reports', href: '/reports', icon: BarChart3, roles: ['admin', 'clinician', 'supervisor'] },
   { name: 'Archive', href: '/archive', icon: Archive, roles: ['admin', 'clinician', 'supervisor'] },
+  { name: 'Settings', href: '/admin/settings', icon: Settings, roles: ['admin', 'clinician', 'supervisor'] },
 ];
 
 const billingNavigation = [
@@ -39,7 +40,6 @@ const billingNavigation = [
 
 const adminNavigation = [
   { name: 'User Management', href: '/admin/users', icon: Shield },
-  { name: 'System Settings', href: '/admin/settings', icon: Settings },
 ];
 
 export const Sidebar = ({ isOpen, currentPath }: SidebarProps) => {
@@ -61,6 +61,24 @@ export const Sidebar = ({ isOpen, currentPath }: SidebarProps) => {
         isOpen ? 'w-64' : 'w-16'
       )}
     >
+      {/* Logo Section */}
+      <div className={cn(
+        'flex items-center p-4 border-b border-gray-200',
+        !isOpen && 'justify-center px-2'
+      )}>
+        <img 
+          src="/eira-logo.svg" 
+          alt="Eira Notes" 
+          className={cn(
+            'transition-all duration-300',
+            isOpen ? 'h-8 w-8' : 'h-6 w-6'
+          )}
+        />
+        {isOpen && (
+          <span className="ml-3 text-lg font-bold text-gray-900">Eira Notes</span>
+        )}
+      </div>
+      
       {/* Navigation */}
       <nav className="flex-1 px-2 py-4 space-y-1">
         {navigation.filter(item => canViewItem(item.roles)).map((item) => {
@@ -111,7 +129,7 @@ export const Sidebar = ({ isOpen, currentPath }: SidebarProps) => {
         )}
 
         {/* Admin Section */}
-        {currentUser?.role === 'admin' && isOpen && (
+        {(currentUser?.role === 'admin' || currentUser?.role === 'supervisor') && isOpen && (
           <div className="pt-6">
             <h3 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
               Administration

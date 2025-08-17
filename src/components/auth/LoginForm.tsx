@@ -8,14 +8,14 @@ import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
 
 export const LoginForm = () => {
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const { login, isLoading } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await login(email, password);
+      await login(username, password);
       toast({
         title: 'Success',
         description: 'Logged in successfully',
@@ -39,13 +39,13 @@ export const LoginForm = () => {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="username">Username</Label>
               <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email"
+                id="username"
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Enter your username"
                 required
               />
             </div>
@@ -66,9 +66,9 @@ export const LoginForm = () => {
           </form>
           <div className="mt-4 p-3 bg-gray-100 rounded-lg text-xs">
             <p className="font-medium">Demo Accounts:</p>
-            <p>Admin: admin@clinic.com / password</p>
-            <p>Clinician: clinician@clinic.com / password</p>
-            <p>Supervisor: supervisor@clinic.com / password</p>
+            <p>Admin: admin / password</p>
+            <p>Clinician: clinician / password</p>
+            <p>Supervisor: supervisor / password</p>
           </div>
         </CardContent>
       </Card>

@@ -12,9 +12,10 @@ interface PatientDetailsProps {
   onEdit: () => void;
   onArchive: () => void;
   onBack: () => void;
+  onCreateNote: () => void;
 }
 
-export const PatientDetails = ({ patient, onEdit, onArchive, onBack }: PatientDetailsProps) => {
+export const PatientDetails = ({ patient, onEdit, onArchive, onBack, onCreateNote }: PatientDetailsProps) => {
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString();
   };
@@ -51,6 +52,10 @@ export const PatientDetails = ({ patient, onEdit, onArchive, onBack }: PatientDe
           <Button onClick={onEdit}>
             <Edit className="h-4 w-4 mr-2" />
             Edit Patient
+          </Button>
+          <Button onClick={onCreateNote}>
+            <FileText className="h-4 w-4 mr-2" />
+            Create SOAP Note
           </Button>
           {patient.status === 'active' && (
             <Button variant="outline" onClick={onArchive}>

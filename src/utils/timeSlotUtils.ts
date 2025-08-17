@@ -1,5 +1,12 @@
 import { TimeSlot, Room, Appointment, SpecialEvent } from '@/types/clinical';
 
+// Format time string to remove seconds (HH:MM:SS -> HH:MM)
+export const formatTime = (timeString: string): string => {
+  if (!timeString) return '';
+  // Handle both HH:MM and HH:MM:SS formats
+  return timeString.substring(0, 5);
+};
+
 // Generate all regular time slots from 09:20 to 16:00
 export const generateTimeSlots = (): TimeSlot[] => {
   const slots: TimeSlot[] = [];

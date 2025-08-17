@@ -1,81 +1,81 @@
--- Create patients table first - Updated to match PatientForm.tsx fields
-DROP TABLE IF EXISTS public.patients CASCADE;
+-- Enable extension for gen_random_uuid()
+create extension if not exists "pgcrypto";
 
-CREATE TABLE public.patients (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  mrn TEXT UNIQUE NOT NULL, -- Medical Record Number
-  firstName TEXT NOT NULL,  -- Changed from first_name
-  lastName TEXT NOT NULL,   -- Changed from last_name
-  dateOfBirth DATE NOT NULL, -- Changed from date_of_birth
-  gender TEXT CHECK (gender IN ('male', 'female', 'other', 'unknown')) NOT NULL,
-  idNumber TEXT NOT NULL,   -- Changed from id_number
-  phone TEXT,
-  cellNumber TEXT,          -- Changed from cell_number
-  email TEXT,
-  occupation TEXT,
-  dependentCode TEXT,       -- Changed from dependent_code
-  
-  -- Main Member fields (individual columns instead of JSONB)
-  medicalAidName TEXT,
-  medicalAidNumber TEXT,
-  medicalAidId TEXT,
-  mainMemberIdNumber TEXT,
-  bank TEXT,
-  bankAccountNumber TEXT,
-  mainMemberOccupation TEXT,
-  employerName TEXT,
-  referringDoctor TEXT,
-  familyDoctor TEXT,
-  
-  -- Address fields (individual columns instead of JSONB)
-  street TEXT,
-  city TEXT,
-  
-  -- Next of Kin 1 fields (individual columns instead of JSONB)
-  nextOfKin1Name TEXT,
-  nextOfKin1Relationship TEXT,
-  nextOfKin1Phone TEXT,
-  
-  -- Next of Kin 2 fields (individual columns instead of JSONB)
-  nextOfKin2Name TEXT,
-  nextOfKin2Relationship TEXT,
-  nextOfKin2Phone TEXT,
-  
-  -- Medical information (as TEXT to match form, can be converted to arrays later)
-  allergies TEXT,           -- Form expects comma-separated string
-  medications TEXT,         -- Form expects comma-separated string
-  medicalHistory TEXT,      -- Form expects comma-separated string
-  
-  -- System fields
-  lastVisit TIMESTAMP WITH TIME ZONE, -- Changed from last_visit
-  status TEXT CHECK (status IN ('active', 'inactive', 'deceased')) DEFAULT 'active',
-  createdAt TIMESTAMP WITH TIME ZONE DEFAULT NOW(), -- Changed from created_at
-  updatedAt TIMESTAMP WITH TIME ZONE DEFAULT NOW()  -- Changed from updated_at
+drop table if exists public.patients cascade;
+
+create table public.patients (
+  id uuid primary key default gen_random_uuid(),
+  mrn text unique not null,
+  first_name text not null,
+  last_name text not null,
+  date_of_birth date not null,
+  gender text check (gender in ('male','female','other','unknown')) not null,
+  id_number text not null,
+  phone text,
+  cell_number text,
+  email text,
+  occupation text,
+  dependent_code text,
+
+  medical_aid_name text,
+  medical_aid_number text,
+  medical_aid_id text,
+  main_member_id_number text,
+  bank text,
+  bank_account_number text,
+  main_member_occupation text,
+  employer_name text,
+  referring_doctor text,
+  family_doctor text,
+
+  street text,
+  city text,
+
+  next_of_kin1_name text,
+  next_of_kin1_relationship text,
+  next_of_kin1_phone text,
+
+  next_of_kin2_name text,
+  next_of_kin2_relationship text,
+  next_of_kin2_phone text,
+
+  allergies text,
+  medications text,
+  medical_history text,
+
+  last_visit timestamptz,
+  status text check (status in ('active','inactive','deceased')) default 'active',
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
 );
 
--- Enable Row Level Security
-ALTER TABLE public.patients ENABLE ROW LEVEL SECURITY;
+alter table public.patients enable row level security;
 
--- Create RLS policy
-CREATE POLICY "Allow all operations on patients" ON public.patients FOR ALL USING (true);
+-- Dev-only: allow all ops for authenticated users
+create policy "patients all for authenticated"
+on public.patients
+for all
+to authenticated
+using (true)
+with check (true);
 
--- Create indexes for better performance
-CREATE INDEX idx_patients_mrn ON public.patients(mrn);
-CREATE INDEX idx_patients_lastName ON public.patients(lastName);
-CREATE INDEX idx_patients_firstName ON public.patients(firstName);
-CREATE INDEX idx_patients_idNumber ON public.patients(idNumber);
-CREATE INDEX idx_patients_status ON public.patients(status);
-CREATE INDEX idx_patients_dateOfBirth ON public.patients(dateOfBirth);
+-- Updated-at trigger
+create or replace function update_updated_at_column()
+returns trigger as $$
+begin
+  new.updated_at = now();
+  return new;
+end;
+$$ language plpgsql;
 
--- Create a function to automatically update the updatedAt timestamp
-CREATE OR REPLACE FUNCTION update_updated_at_column()
-RETURNS TRIGGER AS $$
-BEGIN
-    NEW.updatedAt = NOW();
-    RETURN NEW;
-END;
-$$ language 'plpgsql';
+create trigger trg_patients_updated_at
+before update on public.patients
+for each row execute function update_updated_at_column();
 
--- Create trigger to automatically update updatedAt
-CREATE TRIGGER update_patients_updatedAt BEFORE UPDATE ON public.patients
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+-- Helpful indexes
+create index idx_patients_mrn on public.patients(mrn);
+create index idx_patients_last_name on public.patients(last_name);
+create index idx_patients_first_name on public.patients(first_name);
+create index idx_patients_id_number on public.patients(id_number);
+create index idx_patients_status on public.patients(status);
+create index idx_patients_dob on public.patients(date_of_birth);

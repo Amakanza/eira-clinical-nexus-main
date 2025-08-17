@@ -35,6 +35,7 @@ const Appointments = () => {
   const handleAppointmentSave = (appointment: Appointment) => {
     // The hook handles the state update, we just need to close the form
     console.log('Appointment saved:', appointment);
+    handleFormClose();
   };
 
   return (

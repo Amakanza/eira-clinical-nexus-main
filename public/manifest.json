@@ -1,7 +1,7 @@
 
 {
-  "name": "Eira Clinical Nexus",
-  "short_name": "Eira",
+  "name": "Eira Notes",
+  "short_name": "Eira Notes",
   "description": "Advanced Clinical Notes and Reporting Platform",
   "start_url": "/",
   "display": "standalone",
@@ -16,6 +16,11 @@
       "src": "/favicon.ico",
       "sizes": "any",
       "type": "image/x-icon"
+    },
+    {
+      "src": "/eira-logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
     }
   ]
 }

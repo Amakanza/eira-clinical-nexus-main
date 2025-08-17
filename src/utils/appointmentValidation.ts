@@ -9,12 +9,26 @@ export const validateAppointment = (
   rooms: Room[],
   excludeId?: string
 ): { isValid: boolean; error?: string } => {
-  if (!appointmentData.clinicianId || !appointmentData.date) {
-    return { isValid: false, error: 'Clinician and date are required' };
+  if (!appointmentData.date) {
+    return { isValid: false, error: 'Date is required' };
   }
 
-  // For regular time slots
-  if (appointmentData.timeSlot) {
+  if (!appointmentData.patientName) {
+    return { isValid: false, error: 'Patient name is required' };
+  }
+
+  if (!appointmentData.roomId) {
+    return { isValid: false, error: 'Room is required' };
+  }
+
+  // For early morning appointments, clinician is optional
+  const isEarlyMorning = appointmentData.type === 'early-morning';
+  if (!isEarlyMorning && !appointmentData.clinicianId) {
+    return { isValid: false, error: 'Clinician is required for regular appointments' };
+  }
+
+  // For regular time slots with clinician
+  if (appointmentData.timeSlot && appointmentData.clinicianId) {
     const isAvailable = isClinicianAvailable(
       appointmentData.clinicianId,
       appointmentData.date,
@@ -28,20 +42,21 @@ export const validateAppointment = (
     if (!isAvailable) {
       return { isValid: false, error: 'Clinician is not available at this time' };
     }
+  }
+  
+  // Check room capacity for all appointments
+  if (appointmentData.roomId && appointmentData.timeSlot) {
+    const hasCapacity = hasRoomCapacity(
+      appointmentData.roomId,
+      appointmentData.date,
+      appointmentData.timeSlot,
+      appointments,
+      rooms,
+      excludeId
+    );
     
-    if (appointmentData.roomId) {
-      const hasCapacity = hasRoomCapacity(
-        appointmentData.roomId,
-        appointmentData.date,
-        appointmentData.timeSlot,
-        appointments,
-        rooms,
-        excludeId
-      );
-      
-      if (!hasCapacity) {
-        return { isValid: false, error: 'Room is at capacity for this time slot' };
-      }
+    if (!hasCapacity) {
+      return { isValid: false, error: 'Room is at capacity for this time slot' };
     }
   }
 

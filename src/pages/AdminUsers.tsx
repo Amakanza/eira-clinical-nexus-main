@@ -4,36 +4,24 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Shield, User, Plus } from 'lucide-react';
 import { ClinicianBadge } from '@/components/ui/clinician-badge';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { RegisterForm } from '@/components/auth/RegisterForm';
+import { useAuth } from '@/contexts/AuthContext';
+import { useSupabaseAppointments } from '@/hooks/useSupabaseAppointments';
 
 const AdminUsers = () => {
   const [showRegisterForm, setShowRegisterForm] = useState(false);
+  const { currentUser } = useAuth();
+  const { clinicians, loading, error } = useSupabaseAppointments();
 
-  // Mock user data with clinician colors
-  const mockUsers = [
-    {
-      id: '1',
-      firstName: 'Dr. Michael',
-      lastName: 'Wilson',
-      email: 'michael@clinic.com',
-      role: 'Administrator',
-      initials: 'MW',
-      clinicianColor: '#EF4444'
-    },
-    {
-      id: '2',
-      firstName: 'Sarah',
-      lastName: 'Thompson',
-      email: 'sarah@clinic.com',
-      role: 'Physiotherapist',
-      initials: 'ST',
-      clinicianColor: '#3B82F6'
-    }
-  ];
+  // Add current user to the list if they're an admin or supervisor and not already in clinicians
+  const allUsers = [...clinicians];
+  if (currentUser && (currentUser.role === 'admin' || currentUser.role === 'supervisor') && !clinicians.find(c => c.id === currentUser.id)) {
+    allUsers.unshift(currentUser);
+  }
 
   if (showRegisterForm) {
-    return <RegisterForm />;
+    return <RegisterForm onBack={() => setShowRegisterForm(false)} />;
   }
 
   return (
@@ -62,36 +50,40 @@ const AdminUsers = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {mockUsers.map((user) => (
-                  <div key={user.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                    <div className="flex items-center space-x-4">
-                      <ClinicianBadge 
-                        clinician={user}
-                        size="md"
-                      />
-                      <div>
-                        <p className="font-medium">{user.firstName} {user.lastName}</p>
-                        <p className="text-sm text-gray-500">{user.role}</p>
-                        <p className="text-xs text-gray-400">{user.email}</p>
+              {loading ? (
+                <div className="text-center py-4">Loading users...</div>
+              ) : error ? (
+                <div className="text-center py-4 text-red-500">Error loading users: {error}</div>
+              ) : (
+                <div className="space-y-4">
+                  {allUsers.map((user) => (
+                    <div key={user.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <div className="flex items-center space-x-4">
+                        <ClinicianBadge 
+                          clinician={user}
+                          size="md"
+                        />
+                        <div>
+                          <p className="font-medium">{user.firstName} {user.lastName}</p>
+                          <p className="text-sm text-gray-500 capitalize">{user.role}</p>
+                          <p className="text-xs text-gray-400">{user.email}</p>
+                          {user.username && (
+                            <p className="text-xs text-gray-400">@{user.username}</p>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <div className={`w-2 h-2 rounded-full ${
+                          user.isActive ? 'bg-green-500' : 'bg-red-500'
+                        }`}></div>
+                        <Button variant="outline" size="sm">Edit</Button>
                       </div>
                     </div>
-                    <Button variant="outline" size="sm">Edit</Button>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
-        </div>
-        
-        <div className="mt-8">
-          <Button 
-            variant="outline" 
-            onClick={() => setShowRegisterForm(false)}
-            className="w-full"
-          >
-            Back to User List
-          </Button>
         </div>
       </div>
     </MainLayout>

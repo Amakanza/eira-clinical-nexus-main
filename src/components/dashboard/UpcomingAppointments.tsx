@@ -14,8 +14,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { useAppointments } from '@/hooks/useAppointments';
+import { Appointment } from '@/types/clinical';
+import { format } from 'date-fns';
 
-interface Appointment {
+interface DisplayAppointment {
   id: string;
   patientName: string;
   time: string;
@@ -24,45 +27,6 @@ interface Appointment {
   location: string;
   duration: string;
 }
-
-const mockAppointments: Appointment[] = [
-  {
-    id: '1',
-    patientName: 'John Smith',
-    time: '9:00 AM',
-    type: 'Follow-up Consultation',
-    status: 'scheduled',
-    location: 'Room 101',
-    duration: '30 min'
-  },
-  {
-    id: '2',
-    patientName: 'Emma Johnson',
-    time: '10:30 AM',
-    type: 'Initial Consultation',
-    status: 'scheduled',
-    location: 'Room 203',
-    duration: '45 min'
-  },
-  {
-    id: '3',
-    patientName: 'Michael Brown',
-    time: '2:00 PM',
-    type: 'Procedure Review',
-    status: 'in-progress',
-    location: 'Room 105',
-    duration: '20 min'
-  },
-  {
-    id: '4',
-    patientName: 'Sarah Davis',
-    time: '3:30 PM',
-    type: 'Therapy Session',
-    status: 'scheduled',
-    location: 'Room 301',
-    duration: '60 min'
-  }
-];
 
 const getStatusColor = (status: string) => {
   switch (status) {
@@ -75,6 +39,57 @@ const getStatusColor = (status: string) => {
 };
 
 export const UpcomingAppointments = () => {
+  const { appointments, rooms, loading, error } = useAppointments();
+  
+  // Get today's appointments
+  const today = new Date();
+  const todayStr = format(today, 'yyyy-MM-dd');
+  const todaysAppointments = appointments.filter(apt => apt.date === todayStr);
+  
+  // Transform appointments for display
+  const displayAppointments: DisplayAppointment[] = todaysAppointments.map(apt => {
+    const room = rooms.find(r => r.id === apt.roomId);
+    return {
+      id: apt.id,
+      patientName: apt.patientName || 'Unknown Patient',
+      time: apt.timeSlot,
+      type: apt.type,
+      status: apt.status as any,
+      location: room?.name || 'Unknown Room',
+      duration: `${apt.duration} min`
+    };
+  });
+  
+  if (loading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg font-semibold text-gray-900">
+            Today's Appointments
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center py-4">Loading appointments...</div>
+        </CardContent>
+      </Card>
+    );
+  }
+  
+  if (error) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg font-semibold text-gray-900">
+            Today's Appointments
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center py-4 text-red-600">Error loading appointments: {error}</div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
@@ -88,7 +103,12 @@ export const UpcomingAppointments = () => {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {mockAppointments.map((appointment) => (
+          {displayAppointments.length === 0 ? (
+            <div className="text-center py-4 text-gray-500">
+              No appointments scheduled for today
+            </div>
+          ) : (
+            displayAppointments.map((appointment) => (
             <div key={appointment.id} className="flex items-center justify-between p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
               <div className="flex items-center space-x-3">
                 <div className="flex-shrink-0">
@@ -136,7 +156,8 @@ export const UpcomingAppointments = () => {
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
-          ))}
+          ))
+          )}
         </div>
       </CardContent>
     </Card>

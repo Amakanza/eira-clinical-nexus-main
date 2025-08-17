@@ -2,6 +2,8 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
+import { EvaluationTemplatePicker } from './EvaluationTemplatePicker';
+import { SOAPNoteForm } from './SOAPNoteForm';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -20,7 +22,7 @@ const patientSchema = z.object({
   dateOfBirth: z.string().min(1, 'Date of birth is required'),
   gender: z.enum(['male', 'female', 'other', 'unknown']),
   idNumber: z.string().min(1, 'ID number is required'),
-  phone: z.string().optional(),
+  phone: z.string().min(1, 'Phone number is required'),
   cellNumber: z.string().optional(),
   email: z.string().email('Invalid email').optional().or(z.literal('')),
   occupation: z.string().optional(),
@@ -67,9 +69,10 @@ interface PatientFormProps {
   isLoading?: boolean;
 }
 
-// Generate a random 5-digit medical record number
+// Generate a random 10-digit medical record number
 const generateMRN = (): string => {
-  return Math.floor(10000 + Math.random() * 90000).toString();
+  const random = Math.floor(1000000000 + Math.random() * 9000000000);
+  return random.toString();
 };
 
 export const PatientForm = ({ patient, onSubmit, onCancel, isLoading }: PatientFormProps) => {
@@ -149,14 +152,16 @@ export const PatientForm = ({ patient, onSubmit, onCancel, isLoading }: PatientF
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
             <Tabs defaultValue="basic" className="w-full">
-              <TabsList className="grid w-full grid-cols-6">
-                <TabsTrigger value="basic">Basic</TabsTrigger>
-                <TabsTrigger value="mainmember">Main Member</TabsTrigger>
-                <TabsTrigger value="nextofkin">Next of Kin</TabsTrigger>
-                <TabsTrigger value="address">Address</TabsTrigger>
-                <TabsTrigger value="medical">Medical</TabsTrigger>
-                <TabsTrigger value="diagnosis">Diagnosis</TabsTrigger>
-              </TabsList>
+  <TabsList className="grid w-full grid-cols-8">
+    <TabsTrigger value="basic">Basic</TabsTrigger>
+    <TabsTrigger value="mainmember">Main Member</TabsTrigger>
+    <TabsTrigger value="nextofkin">Next of Kin</TabsTrigger>
+    <TabsTrigger value="address">Address</TabsTrigger>
+    <TabsTrigger value="medical">Medical</TabsTrigger>
+    <TabsTrigger value="diagnosis">Diagnosis</TabsTrigger>
+    <TabsTrigger value="evaluations">Evaluations</TabsTrigger>
+    <TabsTrigger value="soap">SOAP Notes</TabsTrigger>
+  </TabsList>
 
               <TabsContent value="basic" className="space-y-4">
                 <h3 className="text-lg font-medium">Basic Information</h3>
@@ -648,6 +653,23 @@ export const PatientForm = ({ patient, onSubmit, onCancel, isLoading }: PatientF
                   diagnoses={diagnoses}
                   onAddDiagnosis={handleAddDiagnosis}
                   onRemoveDiagnosis={handleRemoveDiagnosis}
+                />
+              </TabsContent>
+
+              <TabsContent value="evaluations" className="space-y-4">
+                <h3 className="text-lg font-medium">Physiotherapy Evaluations</h3>
+                <EvaluationTemplatePicker 
+                  onSelectTemplate={(template) => console.log('Selected template:', template)}
+                  onCustomize={(template) => console.log('Customizing template:', template)}
+                />
+              </TabsContent>
+
+              <TabsContent value="soap" className="space-y-4">
+                <h3 className="text-lg font-medium">SOAP Notes</h3>
+                <SOAPNoteForm
+                  patientId={patient?.id || ''}
+                  onSave={async (data) => console.log('Saving draft:', data)}
+                  onFinalize={async (data) => console.log('Finalizing:', data)}
                 />
               </TabsContent>
             </Tabs>

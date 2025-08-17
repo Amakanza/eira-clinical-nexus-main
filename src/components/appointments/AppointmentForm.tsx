@@ -12,7 +12,7 @@ import { CalendarIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Appointment, TimeSlot } from '@/types/clinical';
 import { useAppointments } from '@/hooks/useAppointments';
-import { isEarlyMorningTime } from '@/utils/timeSlotUtils';
+import { isEarlyMorningTime, formatTime } from '@/utils/timeSlotUtils';
 import { toast } from '@/hooks/use-toast';
 
 interface AppointmentFormProps {
@@ -91,6 +91,13 @@ export const AppointmentForm: React.FC<AppointmentFormProps> = ({
       const selectedTimeSlot = timeSlots.find(slot => slot.id === formData.timeSlotId);
       const selectedRoom = rooms.find(room => room.id === formData.roomId);
       const selectedClinician = clinicians.find(c => c.id === formData.clinicianId);
+      
+
+      // Add debugging
+      console.log('Form data:', formData);
+      console.log('Selected clinician:', selectedClinician);
+      console.log('Selected room:', selectedRoom);
+      console.log('Selected time slot:', selectedTimeSlot);
       
       const appointmentData: Partial<Appointment> = {
         patientName: formData.patientName,
@@ -275,7 +282,7 @@ export const AppointmentForm: React.FC<AppointmentFormProps> = ({
                 <SelectContent>
                   {timeSlots.map((slot) => (
                     <SelectItem key={slot.id} value={slot.id}>
-                      {slot.startTime} - {slot.endTime}
+                      {formatTime(slot.startTime)} - {formatTime(slot.endTime)}
                     </SelectItem>
                   ))}
                 </SelectContent>

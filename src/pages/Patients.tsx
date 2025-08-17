@@ -7,6 +7,7 @@ import { PatientForm } from '@/components/patients/PatientForm';
 import { PatientList } from '@/components/patients/PatientList';
 import { PatientDetails } from '@/components/patients/PatientDetails';
 import { usePatients } from '@/hooks/usePatients';
+import { useClinicalNotes } from '@/hooks/useClinicalNotes';
 import { Patient } from '@/types/clinical';
 
 type ViewMode = 'list' | 'add' | 'edit' | 'details';
@@ -17,6 +18,7 @@ const Patients = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const { patients, loading, addPatient, updatePatient, archivePatient, unarchivePatient, isOffline } = usePatients();
+  const { addNote } = useClinicalNotes();
 
   const handleAddPatient = () => {
     setSelectedPatient(null);
@@ -31,6 +33,25 @@ const Patients = () => {
   const handleViewPatient = (patient: Patient) => {
     setSelectedPatient(patient);
     setViewMode('details');
+  };
+
+  const handleCreateNote = async () => {
+    if (!selectedPatient) return;
+    
+    try {
+      await addNote({
+        patientId: selectedPatient.id,
+        type: 'soap-note',
+        title: 'SOAP Note',
+        content: '',
+        authorId: 'currentUserId', // TODO: Replace with actual user ID
+        authorName: 'Current User', // TODO: Replace with actual user name
+        status: 'draft'
+      });
+      // TODO: Navigate to note editor
+    } catch (error) {
+      console.error('Failed to create note:', error);
+    }
   };
 
   const handleArchivePatient = async (patient: Patient) => {
@@ -89,12 +110,14 @@ const Patients = () => {
         );
       
       case 'details':
+        console.log('Rendering PatientDetails', { viewMode, selectedPatient });
         return selectedPatient ? (
           <PatientDetails
             patient={selectedPatient}
             onEdit={() => setViewMode('edit')}
             onArchive={() => handleArchivePatient(selectedPatient)}
             onBack={() => setViewMode('list')}
+            onCreateNote={handleCreateNote}
           />
         ) : null;
       

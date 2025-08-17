@@ -100,49 +100,9 @@ export const MonthlyView: React.FC<MonthlyViewProps> = ({
                   </div>
                   
                   {dayAppointments.length > 0 && (
-                    <div className="space-y-1">
-                      {/* Show first few appointments */}
-                      {dayAppointments.slice(0, 2).map(apt => (
-                        <div
-                          key={apt.id}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onAppointmentClick(apt);
-                          }}
-                          className="text-xs p-1 bg-blue-100 rounded truncate hover:bg-blue-200"
-                        >
-                          <div className="flex items-center">
-                            <Clock className="h-3 w-3 mr-1" />
-                            {apt.timeSlot ? 
-                              apt.timeSlot.startTime : 
-                              apt.customStartTime
-                            }
-                          </div>
-                          <div className="truncate font-medium">
-                            {apt.patientName}
-                          </div>
-                        </div>
-                      ))}
-                      
-                      {/* Show count if more appointments */}
-                      {dayAppointments.length > 2 && (
-                        <div className="text-xs text-gray-600 text-center">
-                          +{dayAppointments.length - 2} more
-                        </div>
-                      )}
-                      
-                      {/* Status summary */}
-                      <div className="flex flex-wrap gap-1 mt-1">
-                        {statusCounts.completed > 0 && (
-                          <Badge variant="default" className="text-xs px-1 py-0 bg-green-100 text-green-800">
-                            ✓{statusCounts.completed}
-                          </Badge>
-                        )}
-                        {statusCounts['no-show'] > 0 && (
-                          <Badge variant="default" className="text-xs px-1 py-0 bg-orange-100 text-orange-800">
-                            ✗{statusCounts['no-show']}
-                          </Badge>
-                        )}
+                    <div className="flex items-center justify-center mt-2">
+                      <div className="p-2 bg-blue-100 rounded text-lg font-bold text-blue-800">
+                        {dayAppointments.length}
                       </div>
                     </div>
                   )}

@@ -114,20 +114,15 @@ export const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
                 const earlyAppts = getEarlyMorningAppointments(dateStr);
                 
                 return (
-                  <div key={dateStr} className="space-y-1">
-                    {earlyAppts.map(apt => (
-                      <div
-                        key={apt.id}
-                        onClick={() => onAppointmentClick(apt)}
-                        className="p-1 bg-blue-100 rounded text-xs cursor-pointer hover:bg-blue-200"
+                  <div key={dateStr} className="flex items-center justify-center">
+                    {earlyAppts.length > 0 ? (
+                      <div 
+                        className="p-2 bg-blue-100 rounded text-sm font-medium text-blue-800 cursor-pointer hover:bg-blue-200"
+                        onClick={() => onNewAppointment(dateStr)}
                       >
-                        <p className="font-medium truncate">{apt.patientName}</p>
-                        <p className="text-gray-600">
-                          {apt.customStartTime}-{apt.customEndTime}
-                        </p>
+                        {earlyAppts.length}
                       </div>
-                    ))}
-                    {earlyAppts.length === 0 && (
+                    ) : (
                       <Button
                         size="sm"
                         variant="ghost"
@@ -163,23 +158,15 @@ export const AppointmentCalendar: React.FC<AppointmentCalendarProps> = ({
                     const dayAppointments = getAppointmentsForTimeSlot(dateStr, slot.id);
                     
                     return (
-                      <div key={`${dateStr}-${slot.id}`} className="space-y-1">
-                        {dayAppointments.slice(0, 2).map(apt => (
-                          <div
-                            key={apt.id}
-                            onClick={() => onAppointmentClick(apt)}
-                            className="p-1 bg-blue-100 rounded text-xs cursor-pointer hover:bg-blue-200"
+                      <div key={`${dateStr}-${slot.id}`} className="flex items-center justify-center">
+                        {dayAppointments.length > 0 ? (
+                          <div 
+                            className="p-2 bg-blue-100 rounded text-sm font-medium text-blue-800 cursor-pointer hover:bg-blue-200"
+                            onClick={() => onNewAppointment(dateStr, slot.id)}
                           >
-                            <p className="font-medium truncate">{apt.patientName}</p>
-                            <p className="text-gray-600 truncate">{apt.clinicianName}</p>
+                            {dayAppointments.length}
                           </div>
-                        ))}
-                        {dayAppointments.length > 2 && (
-                          <p className="text-xs text-gray-500">
-                            +{dayAppointments.length - 2} more
-                          </p>
-                        )}
-                        {dayAppointments.length === 0 && (
+                        ) : (
                           <Button
                             size="sm"
                             variant="ghost"

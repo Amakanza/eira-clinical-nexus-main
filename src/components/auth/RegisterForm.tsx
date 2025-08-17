@@ -6,7 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from '@/hooks/use-toast';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, ArrowLeft } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface RegisterFormData {
   username: string;
@@ -34,7 +35,12 @@ const CLINICIAN_COLORS = [
   '#F43F5E', // Rose
 ];
 
-export const RegisterForm = () => {
+interface RegisterFormProps {
+  onBack?: () => void;
+}
+
+export const RegisterForm = ({ onBack }: RegisterFormProps) => {
+  const { register } = useAuth();
   const [formData, setFormData] = useState<RegisterFormData>({
     username: '',
     firstName: '',
@@ -98,26 +104,19 @@ export const RegisterForm = () => {
     setIsLoading(true);
     
     try {
-      // Generate initials and color for the new user
-      const initials = generateInitials(formData.firstName, formData.lastName);
-      const clinicianColor = formData.role === 'clinician' ? getNextAvailableColor() : null;
-
-      const userData = {
-        ...formData,
-        initials,
-        clinicianColor,
-        isActive: true,
-        createdAt: new Date().toISOString()
-      };
-
-      console.log('Registering user:', userData);
-      
-      // TODO: Implement actual registration logic here
-      // This would typically involve calling an API or auth service
+      // Call the register function from AuthContext
+      const newUser = await register({
+        username: formData.username,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        role: formData.role,
+        password: formData.password
+      });
       
       toast({
         title: 'Success',
-        description: `User ${formData.firstName} ${formData.lastName} registered successfully!`,
+        description: `User ${newUser.firstName} ${newUser.lastName} registered successfully!`,
       });
 
       // Reset form
@@ -131,11 +130,16 @@ export const RegisterForm = () => {
         confirmPassword: ''
       });
 
+      // Go back to user management if callback provided
+      if (onBack) {
+        setTimeout(() => onBack(), 1500); // Small delay to show success message
+      }
+
     } catch (error) {
       console.error('Registration error:', error);
       toast({
         title: 'Error',
-        description: 'Failed to register user. Please try again.',
+        description: error instanceof Error ? error.message : 'Failed to register user. Please try again.',
         variant: 'destructive',
       });
     } finally {
@@ -151,15 +155,26 @@ export const RegisterForm = () => {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
+          {onBack && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onBack}
+              className="absolute top-4 left-4 flex items-center space-x-1"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              <span>Back</span>
+            </Button>
+          )}
           <div className="mx-auto mb-4 w-16 h-16 flex items-center justify-center">
             <img 
-              src="/lovable-uploads/dbdaadad-4512-4805-b774-4b76573a6e62.png" 
+              src="/eira-logo.svg" 
               alt="Eira Notes Logo" 
               className="w-full h-full object-contain"
             />
           </div>
-          <CardTitle className="text-2xl font-bold text-gray-900">Register for Eira Notes</CardTitle>
-          <p className="text-sm text-gray-600">Create your account to get started</p>
+          <CardTitle className="text-2xl font-bold text-gray-900">Register New User</CardTitle>
+          <p className="text-sm text-gray-600">Create a new account for Eira Notes</p>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">

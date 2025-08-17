@@ -97,6 +97,7 @@ export interface User {
   isActive: boolean;
   lastLogin?: string;
   createdAt: string;
+  password?: string; // For mock authentication
 }
 
 export interface TimeSlot {

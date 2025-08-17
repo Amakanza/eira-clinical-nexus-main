@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="900" height="600" viewBox="0 0 900 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="900" height="600" fill="white"/>
+  <!-- Anterior View (Left) -->
+  <g id="anterior" stroke="#222" stroke-width="2" fill="none">
+    <!-- Head -->
+    <ellipse cx="225" cy="110" rx="38" ry="48"/>
+    <!-- Neck -->
+    <rect x="205" y="158" width="40" height="22" rx="16"/>
+    <!-- Shoulders -->
+    <path d="M167,180 Q225,170 283,180"/>
+    <!-- Torso -->
+    <path d="M185,180 Q200,260 200,340 Q200,400 225,480 Q250,400 250,340 Q250,260 265,180"/>
+    <!-- Chest Muscles -->
+    <path d="M185,180 Q225,210 265,180"/>
+    <!-- Abdomen -->
+    <path d="M200,260 Q225,300 250,260"/>
+    <!-- Pelvis -->
+    <ellipse cx="225" cy="370" rx="38" ry="28"/>
+    <!-- Arms -->
+    <path d="M167,180 Q140,260 170,340 Q185,370 175,430 Q170,470 200,520"/>
+    <path d="M283,180 Q310,260 280,340 Q265,370 275,430 Q280,470 250,520"/>
+    <!-- Hands -->
+    <ellipse cx="200" cy="520" rx="18" ry="14"/>
+    <ellipse cx="250" cy="520" rx="18" ry="14"/>
+    <!-- Legs -->
+    <path d="M210,398 Q190,470 210,570"/>
+    <path d="M240,398 Q260,470 240,570"/>
+    <!-- Feet -->
+    <ellipse cx="210" cy="570" rx="14" ry="8"/>
+    <ellipse cx="240" cy="570" rx="14" ry="8"/>
+    <!-- Facial Features -->
+    <ellipse cx="225" cy="120" rx="12" ry="16" fill="none" stroke="#222" stroke-width="1.2"/>
+    <ellipse cx="215" cy="110" rx="3" ry="5" fill="#222"/>
+    <ellipse cx="235" cy="110" rx="3" ry="5" fill="#222"/>
+    <path d="M220,135 Q225,140 230,135" stroke="#222" stroke-width="1.2"/>
+    <!-- Nipples -->
+    <circle cx="210" cy="200" r="2.2" fill="#222"/>
+    <circle cx="240" cy="200" r="2.2" fill="#222"/>
+    <!-- Navel -->
+    <ellipse cx="225" cy="270" rx="2.2" ry="1.2" fill="#222"/>
+    <!-- Anatomical Landmarks (dots) -->
+    <circle cx="225" cy="170" r="3" fill="#888"/>
+    <circle cx="225" cy="370" r="3" fill="#888"/>
+    <circle cx="225" cy="480" r="3" fill="#888"/>
+    <!-- Mid-sagittal line -->
+    <line x1="225" y1="60" x2="225" y2="570" stroke="#888" stroke-width="1" stroke-dasharray="6,6"/>
+    <!-- Horizontal reference lines -->
+    <line x1="170" y1="180" x2="280" y2="180" stroke="#bbb" stroke-width="1" stroke-dasharray="4,4"/>
+    <line x1="170" y1="340" x2="280" y2="340" stroke="#bbb" stroke-width="1" stroke-dasharray="4,4"/>
+    <line x1="170" y1="480" x2="280" y2="480" stroke="#bbb" stroke-width="1" stroke-dasharray="4,4"/>
+  </g>
+  <!-- Posterior View (Right) -->
+  <g id="posterior" stroke="#222" stroke-width="2" fill="none">
+    <!-- Head -->
+    <ellipse cx="675" cy="110" rx="38" ry="48"/>
+    <!-- Neck -->
+    <rect x="655" y="158" width="40" height="22" rx="16"/>
+    <!-- Shoulders -->
+    <path d="M617,180 Q675,170 733,180"/>
+    <!-- Torso -->
+    <path d="M635,180 Q650,260 650,340 Q650,400 675,480 Q700,400 700,340 Q700,260 715,180"/>
+    <!-- Scapulae -->
+    <path d="M645,200 Q660,220 675,200 Q690,220 705,200" stroke="#888" stroke-width="1.2"/>
+    <!-- Spine -->
+    <path d="M675,170 Q675,220 675,370 Q675,480 675,480" stroke="#888" stroke-width="2" stroke-dasharray="4,4"/>
+    <!-- Pelvis -->
+    <ellipse cx="675" cy="370" rx="38" ry="28"/>
+    <!-- Arms -->
+    <path d="M617,180 Q590,260 620,340 Q635,370 625,430 Q620,470 650,520"/>
+    <path d="M733,180 Q760,260 730,340 Q715,370 725,430 Q730,470 700,520"/>
+    <!-- Hands -->
+    <ellipse cx="650" cy="520" rx="18" ry="14"/>
+    <ellipse cx="700" cy="520" rx="18" ry="14"/>
+    <!-- Legs -->
+    <path d="M660,398 Q640,470 660,570"/>
+    <path d="M690,398 Q710,470 690,570"/>
+    <!-- Feet -->
+    <ellipse cx="660" cy="570" rx="14" ry="8"/>
+    <ellipse cx="690" cy="570" rx="14" ry="8"/>
+    <!-- Vertebrae dots -->
+    <circle cx="675" cy="190" r="2.2" fill="#222"/>
+    <circle cx="675" cy="210" r="2.2" fill="#222"/>
+    <circle cx="675" cy="230" r="2.2" fill="#222"/>
+    <circle cx="675" cy="250" r="2.2" fill="#222"/>
+    <circle cx="675" cy="270" r="2.2" fill="#222"/>
+    <circle cx="675" cy="290" r="2.2" fill="#222"/>
+    <circle cx="675" cy="310" r="2.2" fill="#222"/>
+    <circle cx="675" cy="330" r="2.2" fill="#222"/>
+    <circle cx="675" cy="350" r="2.2" fill="#222"/>
+    <circle cx="675" cy="370" r="2.2" fill="#222"/>
+    <!-- Anatomical Landmarks (dots) -->
+    <circle cx="675" cy="170" r="3" fill="#888"/>
+    <circle cx="675" cy="370" r="3" fill="#888"/>
+    <circle cx="675" cy="480" r="3" fill="#888"/>
+    <!-- Mid-sagittal line -->
+    <line x1="675" y1="60" x2="675" y2="570" stroke="#888" stroke-width="1" stroke-dasharray="6,6"/>
+    <!-- Horizontal reference lines -->
+    <line x1="620" y1="180" x2="730" y2="180" stroke="#bbb" stroke-width="1" stroke-dasharray="4,4"/>
+    <line x1="620" y1="340" x2="730" y2="340" stroke="#bbb" stroke-width="1" stroke-dasharray="4,4"/>
+    <line x1="620" y1="480" x2="730" y2="480" stroke="#bbb" stroke-width="1" stroke-dasharray="4,4"/>
+  </g>
+</svg>

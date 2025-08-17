@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Plus, Clock, User } from 'lucide-react';
 import { Appointment, TimeSlot, User as ClinicianType } from '@/types/clinical';
 import { useAppointments } from '@/hooks/useAppointments';
+import { formatTime } from '@/utils/timeSlotUtils';
 
 interface AppointmentTableViewProps {
   date: string;
@@ -20,7 +21,7 @@ export const AppointmentTableView: React.FC<AppointmentTableViewProps> = ({
   onAppointmentClick,
   onNewAppointment
 }) => {
-  const { appointments, timeSlots, clinicians, updateAppointment } = useAppointments();
+  const { appointments, timeSlots, clinicians, updateAppointmentStatus } = useAppointments();
 
   console.log('AppointmentTableView - All appointments:', appointments);
   console.log('AppointmentTableView - Date filter:', date);
@@ -58,7 +59,7 @@ export const AppointmentTableView: React.FC<AppointmentTableViewProps> = ({
 
   const handleStatusChange = async (appointmentId: string, newStatus: string) => {
     try {
-      await updateAppointment(appointmentId, { status: newStatus as Appointment['status'] });
+      await updateAppointmentStatus(appointmentId, newStatus as Appointment['status']);
     } catch (error) {
       console.error('Failed to update appointment status:', error);
     }
@@ -92,7 +93,7 @@ export const AppointmentTableView: React.FC<AppointmentTableViewProps> = ({
                     <p className="font-medium">{apt.patientName}</p>
                     <div className="flex items-center text-sm text-gray-600 mt-1">
                       <Clock className="h-4 w-4 mr-1" />
-                      {apt.customStartTime} - {apt.customEndTime}
+                      {formatTime(apt.customStartTime || '')} - {formatTime(apt.customEndTime || '')}
                     </div>
                     {apt.clinicianName && (
                       <div className="flex items-center text-sm text-gray-600">
@@ -148,7 +149,7 @@ export const AppointmentTableView: React.FC<AppointmentTableViewProps> = ({
               {timeSlots.map(slot => (
                 <TableRow key={slot.id}>
                   <TableCell className="font-medium">
-                    {slot.startTime} - {slot.endTime}
+                    {formatTime(slot.startTime)} - {formatTime(slot.endTime)}
                   </TableCell>
                   {clinicians.map(clinician => {
                     const slotAppointments = getAppointmentsForSlotAndClinician(slot.id, clinician.id);
