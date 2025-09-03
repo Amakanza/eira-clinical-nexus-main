@@ -1,4 +1,4 @@
-
+// src/pages/Patients.tsx - Updated to use direct Supabase hook
 import React, { useState } from 'react';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Button } from '@/components/ui/button';
@@ -6,18 +6,17 @@ import { Plus } from 'lucide-react';
 import { PatientForm } from '@/components/patients/PatientForm';
 import { PatientList } from '@/components/patients/PatientList';
 import { PatientDetails } from '@/components/patients/PatientDetails';
-import { usePatients } from '@/hooks/usePatients';
+import { useSupabasePatients, type PatientFormData, type DatabasePatient } from '@/hooks/useSupabasePatients';
 import { useClinicalNotes } from '@/hooks/useClinicalNotes';
-import { Patient } from '@/types/clinical';
 
 type ViewMode = 'list' | 'add' | 'edit' | 'details';
 
 const Patients = () => {
   const [viewMode, setViewMode] = useState<ViewMode>('list');
-  const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
+  const [selectedPatient, setSelectedPatient] = useState<DatabasePatient | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  const { patients, loading, addPatient, updatePatient, archivePatient, unarchivePatient, isOffline } = usePatients();
+  const { patients, loading, addPatient, updatePatient, archivePatient, error } = useSupabasePatients();
   const { addNote } = useClinicalNotes();
 
   const handleAddPatient = () => {
@@ -25,12 +24,12 @@ const Patients = () => {
     setViewMode('add');
   };
 
-  const handleEditPatient = (patient: Patient) => {
+  const handleEditPatient = (patient: DatabasePatient) => {
     setSelectedPatient(patient);
     setViewMode('edit');
   };
 
-  const handleViewPatient = (patient: Patient) => {
+  const handleViewPatient = (patient: DatabasePatient) => {
     setSelectedPatient(patient);
     setViewMode('details');
   };
@@ -54,8 +53,8 @@ const Patients = () => {
     }
   };
 
-  const handleArchivePatient = async (patient: Patient) => {
-    if (window.confirm(`Are you sure you want to archive ${patient.firstName} ${patient.lastName}?`)) {
+  const handleArchivePatient = async (patient: DatabasePatient) => {
+    if (window.confirm(`Are you sure you want to archive ${patient.first_name} ${patient.last_name}?`)) {
       try {
         await archivePatient(patient.id);
       } catch (error) {
@@ -64,17 +63,18 @@ const Patients = () => {
     }
   };
 
-  const handleUnarchivePatient = async (patient: Patient) => {
-    if (window.confirm(`Are you sure you want to unarchive ${patient.firstName} ${patient.lastName}?`)) {
+  const handleUnarchivePatient = async (patient: DatabasePatient) => {
+    if (window.confirm(`Are you sure you want to unarchive ${patient.first_name} ${patient.last_name}?`)) {
       try {
-        await unarchivePatient(patient.id);
+        // TODO: Implement unarchive functionality
+        console.log('Unarchive not implemented yet');
       } catch (error) {
         console.error('Failed to unarchive patient:', error);
       }
     }
   };
 
-  const handleFormSubmit = async (data: any) => {
+  const handleFormSubmit = async (data: PatientFormData) => {
     setIsSubmitting(true);
     try {
       if (selectedPatient) {
@@ -86,6 +86,7 @@ const Patients = () => {
       setSelectedPatient(null);
     } catch (error) {
       console.error('Failed to save patient:', error);
+      // Error is already shown by the hook via toast
     } finally {
       setIsSubmitting(false);
     }
@@ -101,8 +102,8 @@ const Patients = () => {
       case 'add':
       case 'edit':
         return (
-          <PatientForm
-            patient={selectedPatient || undefined}
+          <PatientFormWrapper
+            patient={selectedPatient}
             onSubmit={handleFormSubmit}
             onCancel={handleCancel}
             isLoading={isSubmitting}
@@ -110,9 +111,8 @@ const Patients = () => {
         );
       
       case 'details':
-        console.log('Rendering PatientDetails', { viewMode, selectedPatient });
         return selectedPatient ? (
-          <PatientDetails
+          <PatientDetailsWrapper
             patient={selectedPatient}
             onEdit={() => setViewMode('edit')}
             onArchive={() => handleArchivePatient(selectedPatient)}
@@ -123,42 +123,9 @@ const Patients = () => {
       
       default:
         return (
-          <PatientList
+          <PatientListWrapper
             patients={patients}
             onEditPatient={handleEditPatient}
             onViewPatient={handleViewPatient}
             onArchivePatient={handleArchivePatient}
             onUnarchivePatient={handleUnarchivePatient}
-            isLoading={loading}
-          />
-        );
-    }
-  };
-
-  return (
-    <MainLayout currentPath="/patients">
-      <div className="space-y-6">
-        {viewMode === 'list' && (
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Patient Management</h1>
-              {isOffline && (
-                <p className="text-sm text-amber-600 mt-1">
-                  You're currently offline. Changes will sync when reconnected.
-                </p>
-              )}
-            </div>
-            <Button onClick={handleAddPatient} className="flex items-center space-x-2">
-              <Plus className="h-4 w-4" />
-              <span>Register Patient</span>
-            </Button>
-          </div>
-        )}
-
-        {renderContent()}
-      </div>
-    </MainLayout>
-  );
-};
-
-export default Patients;
